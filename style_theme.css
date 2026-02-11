@@ -5,6 +5,23 @@
    ============================================= */
 
 /* ── 1. 색상 변수 재정의 ─────────────────── */
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.floating-emoji {
+    display: inline-block;
+    animation: float 3s ease-in-out infinite;
+}
+
 :root {
     /* 핵심 브랜드 컬러 (랜딩 페이지 기반) */
     --primary: #f43f5e;
