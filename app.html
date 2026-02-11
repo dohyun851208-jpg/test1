@@ -607,22 +607,40 @@
 
                     <!-- 학생 설정 섹션 -->
                     <div id="studentSettingsSection" class="hidden">
-                        <div class="accent-box box-blue">
-                            <span class="box-label">⚙️ 학급 설정</span>
-                            <div style="margin-bottom:15px;">
-                                <label>학급명</label>
-                                <input type="text" id="studentSettingClassName" placeholder="예: 부평서초6-1"
-                                    style="font-family:'Jua', sans-serif !important;">
+                        <!-- 박스 1: 나의 학급 정보 -->
+                        <div class="accent-box" style="margin-bottom:15px;">
+                            <span class="box-label">📚 나의 학급 정보</span>
+                            <div style="display:flex; flex-direction:column; gap:12px; margin-top:10px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:var(--bg-body); border-radius:12px;">
+                                    <span style="color:var(--text-sub); font-size:0.9rem;">학급명</span>
+                                    <span id="settingsClassName" style="font-weight:700; color:var(--text-main); font-size:0.95rem;">-</span>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:var(--bg-body); border-radius:12px;">
+                                    <span style="color:var(--text-sub); font-size:0.9rem;">학급 코드</span>
+                                    <span id="settingsClassCode" style="font-weight:700; color:var(--text-main); font-size:0.95rem;">-</span>
+                                </div>
                             </div>
-                            <div style="margin-bottom:15px;">
-                                <label>학급 코드</label>
-                                <input type="text" id="studentSettingClassCode" placeholder="예: 부평서초34 (띄어쓰기 금지)"
-                                    style="font-family:'Jua', sans-serif !important;">
+                        </div>
+
+                        <!-- 박스 2: 나의 성장 파트너 (성향 진단) -->
+                        <div class="accent-box" style="margin-bottom:15px;">
+                            <span class="box-label">🧠 나의 성장 파트너</span>
+                            <div id="settingsPersonalityArea" style="margin-top:10px;">
+                                <p style="color:var(--text-sub); text-align:center;">로딩 중...</p>
                             </div>
-                            <button type="button" onclick="saveStudentSettings()"
-                                style="background:var(--color-blue); margin-top:5px;">저장하기</button>
-                            <p style="font-size:0.75rem; color:var(--text-sub); margin-top:10px;">* 학급 코드를 변경하면 새로운
-                                학급으로 이동하며 기존 기록은 유지됩니다.</p>
+                        </div>
+
+                        <!-- 박스 3: 학급 변경 -->
+                        <div class="accent-box" style="border-color:#fca5a5;">
+                            <span class="box-label">🔄 학급 변경</span>
+                            <p style="font-size:0.8rem; color:#ef4444; margin-bottom:12px; line-height:1.5;">
+                                ⚠️ 학급을 변경하면 기존 데이터(일기, 평가, 칭찬 등)가 <strong>모두 삭제</strong>됩니다.
+                            </p>
+                            <div style="margin-bottom:12px;">
+                                <label>새 학급 코드</label>
+                                <input type="text" id="newClassCodeInput" placeholder="이동할 학급 코드 입력" style="font-family:'Jua', sans-serif !important;">
+                            </div>
+                            <button type="button" onclick="changeClassAndReset()" style="background:#ef4444; color:white;">학급 변경하기</button>
                         </div>
                     </div>
                 </div>

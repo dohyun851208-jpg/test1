@@ -556,11 +556,68 @@ function switchStudentMainTab(mode) {
 
 async function loadStudentSettingsData() {
   if (!currentClassCode) return;
-  document.getElementById('studentSettingClassCode').value = currentClassCode;
 
+  // 박스 1: 학급 정보 표시
+  document.getElementById('settingsClassCode').textContent = currentClassCode;
   const { data: cls } = await db.from('classes').select('class_name').eq('class_code', currentClassCode).maybeSingle();
   if (cls) {
-    document.getElementById('studentSettingClassName').value = cls.class_name;
+    document.getElementById('settingsClassName').textContent = cls.class_name;
+  }
+
+  // 박스 2: 성향 진단 정보 표시
+  const area = document.getElementById('settingsPersonalityArea');
+  try {
+    const { data: personality } = await db.from('student_personality')
+      .select('personality_type, question_responses')
+      .eq('class_code', currentClassCode)
+      .eq('student_id', currentStudent.id)
+      .maybeSingle();
+
+    if (!personality) {
+      area.innerHTML = '<p style="color:var(--text-sub); text-align:center; padding:20px 0;">아직 진단하지 않았어요.<br>나의 기록 탭에서 진단을 시작해보세요!</p>';
+      return;
+    }
+
+    const personalities = {
+      analytical: { icon: '🎯', title: '분석형', desc: '구체적이고 논리적인 피드백을 선호하는 스타일' },
+      balanced: { icon: '⚖️', title: '균형형', desc: '논리와 감정의 균형을 중시하는 스타일' },
+      growth: { icon: '🌱', title: '성장형', desc: '과정과 배움을 중시하는 스타일' },
+      empathetic: { icon: '💝', title: '감성형', desc: '공감과 격려를 중시하는 스타일' }
+    };
+
+    const p = personalities[personality.personality_type] || { icon: '❓', title: '알 수 없음', desc: '' };
+
+    let html = `
+      <div style="text-align:center; padding:15px 0; margin-bottom:15px; background:var(--bg-body); border-radius:14px;">
+        <div style="font-size:2.5rem; margin-bottom:6px;">${p.icon}</div>
+        <div style="font-weight:700; font-size:1.1rem; color:var(--text-main);">${p.title}</div>
+        <div style="font-size:0.85rem; color:var(--text-sub); margin-top:4px;">${p.desc}</div>
+      </div>
+    `;
+
+    // 질문별 응답 표시
+    if (personality.question_responses) {
+      html += '<div style="font-weight:700; font-size:0.9rem; color:var(--text-main); margin-bottom:10px;">📋 나의 응답</div>';
+      personalityQuestions.forEach(q => {
+        const answer = personality.question_responses[q.id];
+        if (answer) {
+          const chosen = answer === 'A' ? q.optionA : q.optionB;
+          html += `
+            <div style="padding:10px 12px; margin-bottom:8px; background:var(--bg-body); border-radius:10px; font-size:0.82rem;">
+              <div style="color:var(--text-sub); margin-bottom:4px;">Q${q.id}. ${q.question}</div>
+              <div style="color:var(--text-main); font-weight:700;">${answer}. ${chosen.text}</div>
+            </div>
+          `;
+        }
+      });
+    }
+
+    html += '<button type="button" onclick="resetPersonalityFromSettings()" style="background:var(--border); color:var(--text-main); font-size:0.85rem; padding:10px 20px; margin-top:12px;">다시 진단하기</button>';
+
+    area.innerHTML = html;
+  } catch (err) {
+    console.error('성향 정보 로드 오류:', err);
+    area.innerHTML = '<p style="color:var(--text-sub); text-align:center;">성향 정보를 불러올 수 없습니다.</p>';
   }
 }
 
@@ -606,6 +663,86 @@ async function saveStudentSettings() {
     } catch (error) {
       console.error('학급 정보 변경 오류:', error);
       showModal({ type: 'alert', icon: '❌', title: '오류', message: error.message });
+    }
+  });
+}
+
+// 설정에서 성향 진단 초기화
+async function resetPersonalityFromSettings() {
+  showCustomConfirm('성향 진단을 초기화하고 다시 진단하시겠습니까?', async () => {
+    try {
+      await db.from('student_personality')
+        .delete()
+        .eq('class_code', currentClassCode)
+        .eq('student_id', currentStudent.id);
+
+      studentPersonality = null;
+      quizAnswers = {};
+
+      // 나의 기록 탭으로 이동 → 퀴즈 표시
+      switchStudentMainTab('self');
+    } catch (err) {
+      console.error('성향 초기화 오류:', err);
+      showModal({ type: 'alert', icon: '❌', title: '오류', message: '초기화에 실패했습니다: ' + err.message });
+    }
+  });
+}
+
+// 학급 변경 및 데이터 초기화
+async function changeClassAndReset() {
+  const newCode = document.getElementById('newClassCodeInput').value.replace(/\s/g, '');
+  if (!newCode) {
+    showModal({ type: 'alert', icon: '⚠️', title: '입력 필요', message: '새 학급 코드를 입력해주세요.' });
+    return;
+  }
+  if (newCode === currentClassCode) {
+    showModal({ type: 'alert', icon: '⚠️', title: '동일 학급', message: '현재와 같은 학급 코드입니다.' });
+    return;
+  }
+
+  showCustomConfirm('⚠️ 학급을 변경하면 기존 데이터(일기, 평가, 칭찬 등)가 모두 삭제됩니다.\n\n정말 변경하시겠습니까?', async () => {
+    try {
+      // 새 학급 존재 확인
+      const { data: cls, error: clsError } = await db.from('classes').select('*').eq('class_code', newCode).maybeSingle();
+      if (clsError) throw clsError;
+      if (!cls) {
+        showModal({ type: 'alert', icon: '❌', title: '오류', message: '존재하지 않는 학급 코드입니다.' });
+        return;
+      }
+
+      const sid = String(currentStudent.id);
+      const cc = currentClassCode;
+
+      // 기존 데이터 삭제
+      await Promise.all([
+        db.from('reviews').delete().eq('class_code', cc).eq('reviewer_id', sid),
+        db.from('daily_reflections').delete().eq('class_code', cc).eq('student_id', sid),
+        db.from('project_reflections').delete().eq('class_code', cc).eq('student_id', sid),
+        db.from('teacher_messages').delete().eq('class_code', cc).eq('student_id', sid),
+        db.from('praise_messages').delete().eq('class_code', cc).eq('sender_id', sid),
+        db.from('student_personality').delete().eq('class_code', cc).eq('student_id', sid)
+      ]);
+
+      // 프로필 업데이트
+      const { data: session } = await db.auth.getSession();
+      if (!session?.session?.user) return;
+
+      await db.from('user_profiles')
+        .update({ class_code: newCode, class_name: cls.class_name })
+        .eq('google_uid', session.session.user.id)
+        .eq('role', 'student');
+
+      showModal({
+        type: 'alert',
+        icon: '🎉',
+        title: '학급 변경 완료',
+        message: cls.class_name + ' 학급으로 이동했습니다.\n페이지를 새로고침합니다.',
+        onConfirm: () => window.location.reload()
+      });
+
+    } catch (err) {
+      console.error('학급 변경 오류:', err);
+      showModal({ type: 'alert', icon: '❌', title: '오류', message: '학급 변경에 실패했습니다: ' + err.message });
     }
   });
 }
