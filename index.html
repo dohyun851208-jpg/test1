@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GrowLoop - 우리 반 성장 파트너</title>
+
+    <!-- Google Fonts - Jua -->
+    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Jua', sans-serif;
+            background: linear-gradient(135deg, #FFF9F0 0%, #FFE8F0 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-y: auto;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+            padding: 30px 40px;
+            border: 2px solid #f5f5f4;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .logo-emoji {
+            font-size: 60px;
+            display: inline-block;
+            animation: float 4s ease-in-out infinite;
+            margin-bottom: 15px;
+        }
+
+        .title {
+            font-size: 32px;
+            color: #292524;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 15px;
+            color: #78716c;
+            line-height: 1.6;
+            margin-bottom: 2px;
+            font-weight: 500;
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e7e5e4, transparent);
+            margin: 25px 0;
+        }
+
+        /* Role selection cards */
+        .role-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .role-card {
+            background: white;
+            border-radius: 20px;
+            padding: 15px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #e7e5e4;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .role-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .role-card.student-card {
+            border-color: #fb7185;
+        }
+
+        .role-card.teacher-card {
+            border-color: #818cf8;
+        }
+
+        .role-card.student-card:hover {
+            box-shadow: 0 8px 25px rgba(244, 63, 94, 0.15);
+        }
+
+        .role-card.teacher-card:hover {
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.15);
+        }
+
+        .role-card:active {
+            transform: scale(0.97);
+        }
+
+        .role-emoji {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .role-title {
+            font-size: 20px;
+            color: #292524;
+            margin-bottom: 12px;
+        }
+
+        .role-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Jua', sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        .student-card .role-btn {
+            background: linear-gradient(135deg, #fb7185 0%, #f43f5e 100%);
+        }
+
+        .student-card .role-btn:hover {
+            background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+            box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3);
+        }
+
+        .teacher-card .role-btn {
+            background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
+        }
+
+        .teacher-card .role-btn:hover {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .google-icon {
+            width: 18px;
+            height: 18px;
+        }
+
+
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #78716c;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e7e5e4;
+            border-top-color: #fb7185;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Floating background elements */
+        .bg-decoration {
+            position: fixed;
+            border-radius: 50%;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .bg-circle-1 {
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(135deg, #fb7185, #f43f5e);
+            top: -100px;
+            right: -100px;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .bg-circle-2 {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, #818cf8, #6366f1);
+            bottom: -50px;
+            left: -50px;
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+
+
+        @media (max-width: 480px) {
+            body {
+                padding: 15px 0;
+            }
+
+            .card {
+                padding: 25px 20px;
+            }
+
+            .title {
+                font-size: 26px;
+            }
+
+            .subtitle {
+                font-size: 14px;
+            }
+
+            .logo-emoji {
+                font-size: 50px;
+            }
+
+            .role-grid {
+                gap: 10px;
+            }
+
+            .role-card {
+                padding: 20px 12px;
+            }
+
+            .role-emoji {
+                font-size: 40px;
+            }
+
+            .role-title {
+                font-size: 17px;
+            }
+
+            .role-desc {
+                font-size: 12px;
+            }
+
+            .role-img {
+                height: 120px;
+                /* Mobile height */
+            }
+        }
+
+        /* Role Image Styles */
+        .role-image-wrapper {
+            width: 100%;
+            margin-bottom: 15px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .role-img {
+            width: 100%;
+            height: 160px;
+            /* Default height */
+            object-fit: cover;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .role-card:hover .role-img {
+            transform: scale(1.05);
+        }
+
+        .role-card {
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .role-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 14px 28px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.08);
+            /* Deep shadow effect */
+            background: linear-gradient(to bottom, #ffffff, #fafafa);
+            /* Subtle shade */
+        }
+
+        /* Make button look interactive on card hover */
+        .role-card:hover .role-btn {
+            transform: scale(1.02);
+        }
+
+        /* 태블릿 */
+        @media (min-width: 481px) and (max-width: 768px) {
+            .container {
+                max-width: 520px;
+            }
+        }
+
+        /* 데스크탑 */
+        @media (min-width: 769px) {
+            .container {
+                max-width: 520px;
+            }
+
+            .card {
+                padding: 45px;
+            }
+
+            .logo-emoji {
+                font-size: 70px;
+            }
+
+            .title {
+                font-size: 36px;
+            }
+        }
+
+        /* Footer styles */
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 13px;
+            color: #a8a29e;
+            line-height: 1.6;
+            padding-bottom: 20px;
+        }
+
+        .footer a {
+            color: #78716c;
+            text-decoration: none;
+            margin: 0 5px;
+            transition: color 0.2s;
+            cursor: pointer;
+        }
+
+        .footer a:hover {
+            color: #f43f5e;
+        }
+
+        .footer p {
+            margin-top: 8px;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(61, 54, 50, 0.4);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+            animation: fadeInAnim 0.2s ease-out;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        .modal-box {
+            background: white;
+            width: 90%;
+            max-width: 450px;
+            padding: 30px 25px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            animation: scaleInAnim 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #2E2824;
+            margin-bottom: 15px;
+        }
+
+        .modal-text {
+            font-size: 1rem;
+            color: #57534e;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            word-break: keep-all;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .modal-btn.confirm {
+            background: linear-gradient(135deg, #fb7185 0%, #f43f5e 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
+        }
+
+        .modal-btn.confirm:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .modal-btn.cancel {
+            background: #f5f5f4;
+            color: #78716c;
+        }
+
+        @keyframes fadeInAnim {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes scaleInAnim {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* 이용약관 / 개인정보처리방침 모달 스타일 */
+        .terms-modal-body {
+            text-align: left;
+            max-height: 60vh;
+            overflow-y: auto;
+            line-height: 1.8;
+            font-size: 0.93rem;
+            padding-right: 8px;
+            color: #3D3632;
+        }
+
+        .terms-modal-body::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .terms-modal-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .terms-modal-body::-webkit-scrollbar-thumb {
+            background: #ddd;
+            border-radius: 10px;
+        }
+
+        .terms-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .terms-section {
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .terms-section:last-child {
+            border-bottom: none;
+        }
+
+        .terms-article {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #2E2824;
+            margin: 0 0 8px 0;
+            padding-left: 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .terms-article::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 16px;
+            background: #f43f5e;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .terms-section p {
+            margin: 0 0 6px 0;
+            color: #57534e;
+            font-size: 0.92rem;
+            line-height: 1.75;
+            word-break: keep-all;
+        }
+
+        .terms-list,
+        .terms-list-num {
+            margin: 8px 0 0 0;
+            padding-left: 20px;
+            color: #57534e;
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+
+        .terms-list {
+            list-style: none;
+            padding-left: 14px;
+        }
+
+        .terms-list li {
+            position: relative;
+            padding-left: 14px;
+            margin-bottom: 4px;
+        }
+
+        .terms-list li::before {
+            content: '\2022';
+            position: absolute;
+            left: 0;
+            color: #f43f5e;
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+
+        .terms-list-num li {
+            counter-increment: terms-counter;
+            position: relative;
+            padding-left: 24px;
+            margin-bottom: 4px;
+        }
+
+        .terms-list-num li::before {
+            content: counter(terms-counter) '.';
+            position: absolute;
+            left: 0;
+            color: #f43f5e;
+            font-weight: 700;
+            font-size: 0.92em;
+        }
+
+        .terms-list-plain {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .terms-list-plain li {
+            padding-left: 0;
+        }
+
+        .terms-list-plain li::before {
+            display: none;
+        }
+
+        .terms-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #fb7185, #f43f5e);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-bottom: 6px;
+        }
+
+        .terms-appendix {
+            background: #faf6f1;
+            border-radius: 10px;
+            padding: 14px 16px !important;
+            margin-top: 4px;
+            border-bottom: none !important;
+        }
+
+        .terms-appendix .terms-article::before {
+            background: #8A7F76;
+        }
+    </style>
+    <!-- Noto Sans KR for Modals -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Background decorations -->
+    <div class="bg-decoration bg-circle-1"></div>
+    <div class="bg-decoration bg-circle-2"></div>
+
+    <div class="container">
+        <div class="card">
+            <!-- Logo Section -->
+            <div class="logo-section">
+                <p class="subtitle" style="font-size: 1.1rem; font-weight: 700; color:#57534e; margin-bottom: 20px;">쓰고,
+                    나누고, 성장하는 우리 반 플랫폼</p>
+                <div style="display: flex; justify-content: center;">
+                    <h1 class="title"
+                        style="font-size: 2.7rem; margin: 0; display: inline-flex; align-items: center; gap: 12px; padding: 12px 28px; border: 3px solid var(--primary); border-radius: 50px; color: var(--primary); background: white; box-shadow: 0 4px 15px rgba(244, 63, 94, 0.1);">
+                        <span class="logo-emoji"
+                            style="margin: 0; font-size: 2.7rem; animation: float 4s ease-in-out infinite;">🌱</span>
+                        GrowLoop
+                    </h1>
+                </div>
+            </div>
+
+            <!-- Main Section -->
+            <div id="mainSection">
+
+                <div class="role-grid">
+                    <!-- Student Card -->
+                    <div class="role-card student-card" onclick="signInWithGoogle('student')">
+                        <div class="role-image-wrapper">
+                            <img src="images/student_activity.png" alt="학생 활동" class="role-img">
+                        </div>
+                        <div class="role-title">학생</div>
+                        <button class="role-btn">
+                            <svg class="google-icon" viewBox="0 0 24 24">
+                                <path fill="#fff"
+                                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                                <path fill="#fff"
+                                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                                <path fill="#fff"
+                                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                                <path fill="#fff"
+                                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                            </svg>
+                            쓰고 나누기
+                        </button>
+                    </div>
+
+                    <!-- Teacher Card -->
+                    <div class="role-card teacher-card" onclick="signInWithGoogle('teacher')">
+                        <div class="role-image-wrapper">
+                            <img src="images/teacher_activity.png" alt="교사 활동" class="role-img">
+                        </div>
+                        <div class="role-title">선생님</div>
+                        <button class="role-btn">
+                            <svg class="google-icon" viewBox="0 0 24 24">
+                                <path fill="#fff"
+                                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                                <path fill="#fff"
+                                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                                <path fill="#fff"
+                                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                                <path fill="#fff"
+                                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                            </svg>
+                            환경 구성하기
+                        </button>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <!-- Loading State -->
+            <div id="loadingSection" class="hidden loading">
+                <div class="spinner"></div>
+                <p>로그인 중...</p>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <a onclick="openTermsModal()">이용약관</a> |
+            <a onclick="openPrivacyModal()">개인정보처리방침</a>
+
+            <p>
+                © 2026 GrowLoop. All rights reserved.
+            </p>
+
+            <p>
+                개인정보책임자 김도현 | 문의: dohyun851208@gmail.com
+            </p>
+        </footer>
+    </div>
+
+    <!-- Modal Structure -->
+    <div id="customModal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <span id="modalIcon" class="modal-icon">🤔</span>
+            <div id="modalTitle" class="modal-title">알림</div>
+            <div id="modalMessage" class="modal-text"></div>
+            <input type="text" id="modalInput" class="hidden">
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" id="modalCancelBtn" style="display:none;">취소</button>
+                <button class="modal-btn confirm" id="modalConfirmBtn">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://ftvalqzaiooebkulafzg.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_oNfoK3MlhcFkuvWs9BE97g_6UHbNy_4';
+
+        // Initialize Supabase
+        const { createClient } = supabase;
+        const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // ============================================
+        // 약관/개인정보처리방침 데이터
+        // ============================================
+
+        const TERMS_HTML = `
+<div class="terms-content">
+  <div class="terms-section">
+    <h3 class="terms-article">제1조 (목적)</h3>
+    <p>본 약관은 김도현(이하 "운영자")이 제공하는 GrowLoop 서비스의 이용과 관련하여 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.</p>
+  </div>
+  <div class="terms-section">
+    <h3 class="terms-article">제2조 (서비스 내용)</h3>
+    <p>GrowLoop는 학습 기록 및 동료 평가 기반 성장 관리 서비스입니다.</p>
+    <ul class="terms-list">
+      <li>Google 계정 로그인</li>
+      <li>동료 평가 및 피드백</li>
+      <li>성장 일기 및 프로젝트 기록</li>
+      <li>AI 기반 요약 및 피드백</li>
+    </ul>
+  </div>
+  <div class="terms-section">
+    <h3 class="terms-article">제3조 (회원가입 및 이용자격)</h3>
+    <ol class="terms-list-num">
+      <li>Google 계정을 보유한 누구나 이용할 수 있습니다.</li>
+      <li>회원가입은 Google 인증을 통해 자동 처리됩니다.</li>
+      <li>허위 정보 등록 시 이용이 제한될 수 있습니다.</li>
+    </ol>
+  </div>
+  <div class="terms-section">
+    <h3 class="terms-article">제4조 (이용자의 의무)</h3>
+    <ul class="terms-list">
+      <li>타인의 계정 도용 금지</li>
+      <li>부적절한 콘텐츠 작성 금지</li>
+      <li>서비스 운영 방해 금지</li>
+    </ul>
+  </div>
+  <div class="terms-section">
+    <h3 class="terms-article">제5조 (서비스 변경 및 중단)</h3>
+    <p>운영자는 서비스 개선을 위해 기능을 변경하거나 중단할 수 있습니다.</p>
+  </div>
+  <div class="terms-section">
+    <h3 class="terms-article">제6조 (책임 제한)</h3>
+    <p>본 서비스는 교육 지원 목적의 도구로, 학습 성과에 대한 법적 책임을 지지 않습니다.</p>
+  </div>
+  <div class="terms-section">
+    <h3 class="terms-article">제7조 (분쟁 해결)</h3>
+    <p>본 약관과 관련된 분쟁은 대한민국 법을 따릅니다.</p>
+  </div>
+  <div class="terms-section terms-appendix">
+    <h3 class="terms-article">부칙</h3>
+    <p>본 약관은 2026년 2월 8일부터 시행합니다.</p>
+  </div>
+</div>
+`;
+
+        const PRIVACY_HTML = `
+<div class="terms-content">
+  <div class="terms-section">
+    <h3 class="terms-article">1. 개인정보 처리 목적</h3>
+    <p>GrowLoop는 다음 목적을 위해 개인정보를 처리합니다.</p>
+    <ul class="terms-list">
+      <li>사용자 인증 및 서비스 제공</li>
+      <li>학급 및 학습 활동 관리</li>
+      <li>평가 및 기록 데이터 관리</li>
+      <li>AI 기반 피드백 제공</li>
+    </ul>
+  </div>
+  <div class="terms-section">
+    <h3 class="terms-article">2. 처리하는 개인정보 항목</h3>
+    <span class="terms-badge">필수</span>
+    <ul class="terms-list">
+      <li>Supabase 사용자 ID</li>
+      <li>Google 계정 이메일</li>
+      <li>역할(교사/학생)</li>
+      <li>학급 코드 및 학급명</li>
+      <li>학생번호 또는 모둠번호</li>
+      <li>서비스 이용 중 생성되는 데이터(평가 내용, 성장일기, 메시지, 성향 진단, 프로젝트 기록 등)</li>
+    </ul>
+  </div>
+  <div class="terms-section">
+    <h3 class="terms-article">3. 개인정보 보관 기간</h3>
+    <ul class="terms-list">
+      <li>회원 탈퇴 시까지 보관</li>
+      <li>법령에 따른 보관 필요 시 해당 기간 보관</li>
+    </ul>
+  </div>
+  <div class="terms-section">
+    <h3 class="terms-article">4. 외부 전송(제3자 처리)</h3>
+    <p>AI 피드백/요약 기능 제공을 위해 사용자가 입력한 텍스트 데이터가 Google Gemini API로 전송되어 처리될 수 있습니다.</p>
+  </div>
+  <div class="terms-section">
+    <h3 class="terms-article">5. 안전성 확보조치</h3>
+    <ul class="terms-list">
+      <li>HTTPS 기반 암호화 통신</li>
+      <li>Supabase 인증 시스템 사용</li>
+      <li>접근 권한 최소화</li>
+    </ul>
+  </div>
+  <div class="terms-section">
+    <h3 class="terms-article">6. 이용자의 권리</h3>
+    <p>이용자는 개인정보 열람/정정/삭제/처리정지 요청을 할 수 있습니다.</p>
+  </div>
+  <div class="terms-section">
+    <h3 class="terms-article">7. 개인정보 보호책임자</h3>
+    <ul class="terms-list terms-list-plain">
+      <li><strong>성명:</strong> 김도현</li>
+      <li><strong>이메일:</strong> dohyun851208@gmail.com</li>
+    </ul>
+  </div>
+  <div class="terms-section">
+    <h3 class="terms-article">8. 고지 의무</h3>
+    <p>본 방침은 변경 시 서비스 내 공지를 통해 안내합니다.</p>
+  </div>
+  <div class="terms-section terms-appendix">
+    <h3 class="terms-article">부칙</h3>
+    <p>본 방침은 2026년 2월 8일부터 시행합니다.</p>
+  </div>
+</div>
+`;
+
+        // ============================================
+        // 유틸리티 및 모달 함수
+        // ============================================
+
+        function formatMarkdown(text) {
+            if (!text) return '';
+            text = text.trim();
+            let html = text
+                .replace(/^##\s*(.+)$/gm, '<h3 style="margin-top:20px; color:#2E2824; font-size:1.1rem; text-align:left;">$1</h3>')
+                .replace(/^###\s*(.+)$/gm, '<h4 style="margin-top:15px; color:#57534e; font-size:1rem; text-align:left;">$1</h4>')
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+            html = html.replace(/\n{2,}/g, '</p><p>').replace(/\n/g, '<br>');
+            html = html.replace(/^(<br>)+/, '').replace(/^(<\/p><p>)+/, '');
+            if (!html.startsWith('<h') && !html.startsWith('<p')) html = '<p style="text-align:left;">' + html + '</p>';
+            html = html.replace(/<p>\s*<\/p>/g, '').replace(/<p><br><\/p>/g, '');
+            html = html.replace(/(<\/h[34]>)\s*(<br>)+/g, '$1');
+
+            return html;
+        }
+
+        function showModal({ type = 'alert', icon = '✨', title = '알림', message, onConfirm = null, onCancel = null }) {
+            const modal = document.getElementById('customModal');
+            document.getElementById('modalIcon').textContent = icon;
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalMessage').innerHTML = message;
+            const cancelBtn = document.getElementById('modalCancelBtn');
+            const confirmBtn = document.getElementById('modalConfirmBtn');
+
+            cancelBtn.style.display = (type === 'alert') ? 'none' : 'block';
+
+            const close = () => modal.classList.add('hidden');
+
+            confirmBtn.onclick = () => { if (onConfirm) onConfirm(); close(); };
+            cancelBtn.onclick = () => { if (onCancel) onCancel(); close(); };
+
+            modal.classList.remove('hidden');
+        }
+
+        function openTermsModal() {
+            showModal({
+                type: 'alert',
+                icon: '📜',
+                title: 'GrowLoop 이용약관',
+                message: `<div class="terms-modal-body">${TERMS_HTML}</div>`
+            });
+        }
+
+        function openPrivacyModal() {
+            showModal({
+                type: 'alert',
+                icon: '🔐',
+                title: 'GrowLoop 개인정보처리방침',
+                message: `<div class="terms-modal-body">${PRIVACY_HTML}</div>`
+            });
+        }
+
+        // ============================================
+        // 로그인 및 세션 관리
+        // ============================================
+
+        async function signInWithGoogle(role) {
+            try {
+                document.getElementById('mainSection').classList.add('hidden');
+                document.getElementById('loadingSection').classList.remove('hidden');
+
+                // 이미 세션이 있으면 OAuth 다시 거치지 않고 바로 이동
+                const { data: sessionData } = await db.auth.getSession();
+                if (sessionData?.session) {
+                    window.location.href = 'app.html?role=' + role;
+                    return;
+                }
+
+                const origin = window.location.origin;
+                const path = window.location.pathname.split('/').slice(0, -1).join('/');
+                const redirectUrl = `${origin}${path}/app.html?role=${role}`;
+
+                const { data, error } = await db.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: { redirectTo: redirectUrl }
+                });
+
+                if (error) throw error;
+            } catch (error) {
+                console.error('로그인 오류:', error);
+                alert('로그인 중 오류가 발생했습니다: ' + error.message);
+                document.getElementById('loadingSection').classList.add('hidden');
+                document.getElementById('mainSection').classList.remove('hidden');
+            }
+        }
+
+        // 세션 확인 (자동 리다이렉트 하지 않음 - 역할 선택을 위해)
+        async function checkSession() {
+            // 역할 전환을 위해 index.html에서는 자동 리다이렉트하지 않음
+            // 사용자가 역할 버튼을 직접 클릭하면 signInWithGoogle()에서 처리
+        }
+        checkSession();
+    </script>
+</body>
+
+</html>

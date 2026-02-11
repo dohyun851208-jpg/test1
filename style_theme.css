@@ -1,0 +1,555 @@
+/* =============================================
+   GrowLoop Theme Override
+   - 랜딩 페이지(index.html)의 톤/색상/폰트를
+     학생·선생님 앱 페이지(app.html)에 통일 적용
+   ============================================= */
+
+/* ── 1. 색상 변수 재정의 ─────────────────── */
+:root {
+    /* 핵심 브랜드 컬러 (랜딩 페이지 기반) */
+    --primary: #f43f5e;
+    /* 로즈 핑크 */
+    --color-eval: #f43f5e;
+    /* 평가 = 학생 메인 */
+    --color-eval-bg: #FFF1F2;
+    --color-result: #6366f1;
+    /* 결과 = 선생님 메인 */
+    --color-result-bg: #EEF2FF;
+    --color-teacher: #6366f1;
+    /* 인디고 */
+    --color-teacher-bg: #EEF2FF;
+    --color-teal: #5A9E8F;
+    --color-blue: #818cf8;
+    /* 연보라 */
+    --color-slate: #78716c;
+    --color-danger: #ef4444;
+    --color-setting: #78716c;
+
+    /* 텍스트 */
+    --text-main: #292524;
+    --text-sub: #78716c;
+
+    /* 배경 */
+    --bg-body: #FFF9F0;
+    /* 따뜻한 크림 */
+    --bg-card: #FFFFFF;
+    --bg-soft: #FFF5F5;
+    /* 연한 핑크 */
+    --border: #fecdd3;
+    /* 로즈 보더 */
+    --border-light: #ffe4e6;
+
+    /* 그림자 */
+    --shadow-sm: 0 2px 8px rgba(244, 63, 94, 0.06);
+    --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 14px 28px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.06);
+}
+
+/* ── 2. Body & 배경 ──────────────────────── */
+body {
+    font-family: 'Jua', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    background: linear-gradient(135deg, #FFF9F0 0%, #FFE8F0 100%) !important;
+    min-height: 100vh;
+    color: var(--text-main);
+}
+
+/* ── 3. 메인 카드 ────────────────────────── */
+.card {
+    background: white !important;
+    border-radius: 30px !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06) !important;
+    border: 2px solid #f5f5f4 !important;
+}
+
+/* ── 4. 타이포그래피 ──────────────────────── */
+h1 {
+    font-family: 'Jua', sans-serif !important;
+    font-size: 1.7rem;
+    color: var(--text-main) !important;
+    letter-spacing: -0.5px;
+}
+
+h2,
+h3 {
+    font-family: 'Jua', sans-serif !important;
+    color: var(--text-main);
+}
+
+label {
+    font-family: 'Jua', sans-serif !important;
+    color: var(--text-main);
+}
+
+/* ── 5. 인풋 & 텍스트영역 ────────────────── */
+input,
+textarea,
+select {
+    border: 2px solid #e7e5e4 !important;
+    border-radius: 12px !important;
+    font-family: 'Noto Sans KR', sans-serif !important;
+    transition: all 0.3s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.1) !important;
+    outline: none;
+}
+
+/* ── 6. 버튼 통일 ────────────────────────── */
+button {
+    font-family: 'Jua', sans-serif !important;
+    border-radius: 12px !important;
+    transition: all 0.3s ease !important;
+}
+
+button:active {
+    transform: scale(0.97);
+}
+
+/* 학생용 주요 버튼 */
+.accent-box.box-blue button,
+.accent-box.box-violet button,
+#selfEvaluationSection button[style*="color-blue"],
+#selfEvaluationSection button[onclick*="save"],
+#selfEvaluationSection button[onclick*="submit"],
+button[onclick*="saveDailyReflection"],
+button[onclick*="saveProject"],
+button[onclick*="saveStudentSettings"],
+button[onclick*="submitPeer"],
+button[onclick*="savePraise"],
+button[style*="color-blue"],
+button[style*="color-eval"] {
+    background: linear-gradient(135deg, #fb7185 0%, #f43f5e 100%) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 4px 12px rgba(244, 63, 94, 0.25);
+}
+
+button[style*="color-blue"]:hover,
+button[style*="color-eval"]:hover,
+button[onclick*="save"]:hover,
+button[onclick*="submit"]:hover {
+    box-shadow: 0 6px 20px rgba(244, 63, 94, 0.35);
+    filter: brightness(1.05);
+    transform: translateY(-2px);
+}
+
+/* 선생님용 주요 버튼 */
+button[style*="color-teacher"],
+button[onclick*="saveTeacher"],
+#teacherMain button[style*="color-teacher"] {
+    background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+}
+
+button[style*="color-teacher"]:hover,
+button[onclick*="saveTeacher"]:hover {
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35);
+    filter: brightness(1.05);
+    transform: translateY(-2px);
+}
+
+/* 로그아웃 버튼 */
+button[onclick*="logout"] {
+    background: #f5f5f4 !important;
+    color: #78716c !important;
+    border: 1px solid #e7e5e4 !important;
+    box-shadow: none !important;
+}
+
+button[onclick*="logout"]:hover {
+    background: #e7e5e4 !important;
+}
+
+/* ── 7. 액센트 박스 ──────────────────────── */
+.accent-box {
+    background: white !important;
+    border-radius: 20px !important;
+    border: 2px solid #e7e5e4 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.accent-box.box-blue {
+    border-color: #fecdd3 !important;
+    background: #FFF5F7 !important;
+}
+
+.accent-box.box-violet {
+    border-color: #c7d2fe !important;
+    background: #F5F3FF !important;
+}
+
+.box-label {
+    font-family: 'Jua', sans-serif !important;
+    color: var(--text-main);
+}
+
+/* ── 8. 탭 스타일 ────────────────────────── */
+/* 서브 탭 */
+.sub-tab-container {
+    background: #f5f5f4 !important;
+    border-radius: 14px !important;
+    padding: 4px !important;
+    gap: 4px !important;
+}
+
+.sub-tab-btn {
+    font-family: 'Jua', sans-serif !important;
+    border-radius: 10px !important;
+    border: none !important;
+    color: var(--text-sub) !important;
+    background: transparent !important;
+    transition: all 0.3s ease !important;
+}
+
+.sub-tab-btn.active {
+    background: white !important;
+    color: var(--primary) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    font-weight: 700;
+}
+
+/* 미니 탭 */
+.mini-tab-container {
+    background: #f5f5f4 !important;
+    border-radius: 14px !important;
+    padding: 4px !important;
+}
+
+.mini-tab-btn {
+    font-family: 'Jua', sans-serif !important;
+    border-radius: 10px !important;
+    border: none !important;
+    transition: all 0.3s ease !important;
+}
+
+.mini-tab-btn.active-student {
+    background: linear-gradient(135deg, #fb7185 0%, #f43f5e 100%) !important;
+    color: white !important;
+}
+
+.mini-tab-btn.active-teacher {
+    background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%) !important;
+    color: white !important;
+}
+
+/* ── 9. 하단 네비게이션 바 ────────────────── */
+.bottom-nav {
+    background: white !important;
+    border-top: 1px solid #f5f5f4 !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05) !important;
+    border-radius: 20px 20px 0 0 !important;
+}
+
+.nav-item {
+    color: #a8a29e !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    transition: all 0.3s ease !important;
+}
+
+.nav-item.active-nav {
+    color: var(--primary) !important;
+}
+
+.nav-item.active-nav .nav-icon {
+    transform: scale(1.15);
+}
+
+.nav-item:hover {
+    color: var(--primary) !important;
+    transform: none !important;
+}
+
+/* ── 10. 과목 태그 버튼 ──────────────────── */
+.subject-tag-btn {
+    border: 2px solid #e7e5e4 !important;
+    border-radius: 20px !important;
+    background: white !important;
+    color: var(--text-sub) !important;
+    font-family: 'Jua', sans-serif !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer;
+    padding: 6px 14px;
+    margin: 4px;
+}
+
+.subject-tag-btn:hover {
+    border-color: var(--primary) !important;
+    background: var(--color-eval-bg) !important;
+    transform: translateY(-1px);
+}
+
+.subject-tag-btn.selected {
+    background: linear-gradient(135deg, #fb7185 0%, #f43f5e 100%) !important;
+    color: white !important;
+    border-color: #f43f5e !important;
+    box-shadow: 0 4px 12px rgba(244, 63, 94, 0.2) !important;
+}
+
+/* ── 11. 스탯 카드 ───────────────────────── */
+.stat-card {
+    background: white !important;
+    border-radius: 16px !important;
+    border: 2px solid #f5f5f4 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04) !important;
+}
+
+.stat-num {
+    font-family: 'Jua', sans-serif !important;
+    color: var(--primary) !important;
+}
+
+/* ── 12. 모달 ────────────────────────────── */
+.modal-overlay {
+    backdrop-filter: blur(4px) !important;
+    background: rgba(41, 37, 36, 0.4) !important;
+}
+
+.modal-box {
+    border-radius: 24px !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+}
+
+.modal-title {
+    font-family: 'Jua', sans-serif !important;
+}
+
+.modal-btn.confirm {
+    background: linear-gradient(135deg, #fb7185 0%, #f43f5e 100%) !important;
+    color: white !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3) !important;
+}
+
+.modal-btn.confirm:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+.modal-btn.cancel {
+    background: #f5f5f4 !important;
+    color: #78716c !important;
+    border-radius: 12px !important;
+}
+
+/* ── 13. 스크롤바 ────────────────────────── */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #fecdd3;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #fda4af;
+}
+
+/* ── 14. 로딩 스피너 ─────────────────────── */
+.spinner,
+div[style*="border-top-color"] {
+    border-top-color: #f43f5e !important;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ── 15. 프로필·웰컴 메시지 ──────────────── */
+#welcomeMsg {
+    color: var(--primary) !important;
+    font-family: 'Jua', sans-serif !important;
+}
+
+/* ── 16. 차트 컨테이너 ───────────────────── */
+.chart-container {
+    background: white !important;
+    border-radius: 16px !important;
+    border: 2px solid #f5f5f4 !important;
+}
+
+/* ── 17. 랭킹 테이블 ────────────────────── */
+.ranking-table {
+    border-radius: 16px !important;
+    overflow: hidden;
+}
+
+.ranking-table th {
+    background: linear-gradient(135deg, #fb7185 0%, #f43f5e 100%) !important;
+    color: white !important;
+    font-family: 'Jua', sans-serif !important;
+}
+
+/* ── 18. 진행 바 ─────────────────────────── */
+.bar-fill {
+    background: linear-gradient(135deg, #fb7185 0%, #f43f5e 100%) !important;
+    border-radius: 10px !important;
+}
+
+.bar-track {
+    background: #ffe4e6 !important;
+    border-radius: 10px !important;
+}
+
+/* ── 19. 타임라인 ────────────────────────── */
+.timeline-dot {
+    background: var(--primary) !important;
+}
+
+.timeline-line {
+    background: #fecdd3 !important;
+}
+
+/* ── 20. 선생님 전용 색상 ────────────────── */
+#teacherMain .accent-box.box-violet {
+    border-color: #c7d2fe !important;
+    background: #F5F3FF !important;
+}
+
+#teacherMain .sub-tab-btn.active {
+    color: #6366f1 !important;
+}
+
+#teacherMain .stat-num {
+    color: #6366f1 !important;
+}
+
+/* 선생님 탭용 하단 내비 활성 색상 */
+#teacherMain .nav-item.active-nav,
+#teacherMain .mini-tab-btn.active-teacher {
+    color: #6366f1 !important;
+}
+
+/* 선생님 랭킹 헤더 */
+#teacherMain .ranking-table th {
+    background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%) !important;
+}
+
+/* 선생님 진행바 */
+#teacherMain .bar-fill {
+    background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%) !important;
+}
+
+#teacherMain .bar-track {
+    background: #e0e7ff !important;
+}
+
+/* ── 21. 칭찬 우체통 카드 ────────────────── */
+.praise-card,
+[class*="praise"] {
+    border-radius: 16px !important;
+}
+
+/* ── 22. 애니메이션 ──────────────────────── */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* 부드러운 전환 */
+.hidden {
+    display: none !important;
+}
+
+/* ── 23. 클래스 토글 버튼 ────────────────── */
+#classToggleBtn {
+    border-radius: 12px !important;
+    font-family: 'Jua', sans-serif !important;
+    transition: all 0.3s ease !important;
+}
+
+/* ── 24. 반응형 조정 ─────────────────────── */
+@media (max-width: 480px) {
+    .card {
+        border-radius: 20px !important;
+        padding: 20px 15px !important;
+    }
+
+    h1 {
+        font-size: 1.4rem !important;
+    }
+
+    .accent-box {
+        border-radius: 16px !important;
+    }
+
+    .sub-tab-btn {
+        font-size: 0.8rem !important;
+    }
+}
+
+/* ── 25. 토글 스위치 스타일 ────────────────── */
+.switch-container {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 24px;
+}
+
+.switch-container input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #e7e5e4;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.switch-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+input:checked+.switch-slider {
+    background-color: var(--color-rose);
+}
+
+input:focus+.switch-slider {
+    box-shadow: 0 0 1px var(--color-rose);
+}
+
+input:checked+.switch-slider:before {
+    transform: translateX(22px);
+}

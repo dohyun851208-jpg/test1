@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "WebFetch(domain:startling-semifreddo-73328f.netlify.app)",
+      "Bash(dir:*)"
+    ]
+  }
+}
