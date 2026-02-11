@@ -914,17 +914,7 @@
             </div>
         </div>
     </div>
-    <button class="theme-toggle" onclick="toggleTheme()" aria-label="다크모드 전환"><span id="themeIcon">🌙</span></button>
     <script src="app.js"></script>
-    <script>
-        // Apply theme based on selected role from landing page
-        (function () {
-            const role = localStorage.getItem('selected_role');
-            if (role === 'teacher') {
-                document.body.classList.add('teacher-mode');
-            }
-        })();
-    </script>
 </body>
 
 </html>

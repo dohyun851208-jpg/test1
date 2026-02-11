@@ -22,27 +22,7 @@
     --border-light: #F0EBE4
 }
 
-[data-theme="dark"] {
-    --color-eval: #E07A5F;
-    --color-eval-bg: #2D2522;
-    --color-result: #81B29A;
-    --color-result-bg: #222D25;
-    --color-teacher: #7BA3C4;
-    --color-teacher-bg: #222933;
-    --color-teal: #7BBFB0;
-    --color-blue: #7BA3C4;
-    --color-slate: #A89F91;
-    --color-danger: #E07A7A;
-    --color-setting: #A89F91;
-    --primary: #E07A5F;
-    --text-main: #E8E2DA;
-    --text-sub: #9A918A;
-    --bg-body: #1A1714;
-    --bg-card: #252220;
-    --bg-soft: #2E2A27;
-    --border: #3D3835;
-    --border-light: #333028
-}
+
 
 [data-theme="dark"] .card {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3)
@@ -325,7 +305,7 @@
 }
 
 .target-btn.done::after {
-    content: '✓';
+    content: '??;
     position: absolute;
     top: -4px;
     right: -4px;
@@ -1176,7 +1156,7 @@ button:disabled {
 }
 
 .success-check::after {
-    content: '✓';
+    content: '??;
     color: white;
     font-size: 1.8rem;
     font-weight: bold
@@ -1823,7 +1803,7 @@ button:disabled {
 }
 
 /* ============================================ */
-/* 자기평가 (Self-Evaluation) 컴포넌트 */
+/* ?�기?��? (Self-Evaluation) 컴포?�트 */
 /* ============================================ */
 .gratitude-tags {
     display: grid;
@@ -2016,7 +1996,7 @@ button:disabled {
 }
 
 /* ============================================ */
-/* 교사용 자기평가 관리 */
+/* 교사???�기?��? 관�?*/
 /* ============================================ */
 .message-card {
     background: var(--bg-card);
@@ -2259,7 +2239,7 @@ button:disabled {
 }
 
 /* ============================================ */
-/* 서브 탭 (동료평가/자기평가 내부) */
+/* ?�브 ??(?�료?��?/?�기?��? ?��?) */
 /* ============================================ */
 .sub-tab-container {
     display: flex;
@@ -2305,7 +2285,7 @@ button:disabled {
 }
 
 /* ============================================ */
-/* 성향 진단 (Personality Quiz) */
+/* ?�향 진단 (Personality Quiz) */
 /* ============================================ */
 .quiz-question {
     background: var(--bg-card);
@@ -2410,7 +2390,7 @@ button:disabled {
 }
 
 /* ============================================ */
-/* 과목/활동 태그 */
+/* 과목/?�동 ?�그 */
 /* ============================================ */
 .subject-tags {
     display: flex;
@@ -2439,7 +2419,7 @@ button:disabled {
 }
 
 /* ============================================ */
-/* 캘린더 그리드 */
+/* 캘린??그리??*/
 /* ============================================ */
 .calendar-grid {
     display: grid;
@@ -2514,7 +2494,7 @@ button:disabled {
 }
 
 /* ============================================ */
-/* 워드 클라우드 */
+/* ?�드 ?�라?�드 */
 /* ============================================ */
 .word-cloud {
     display: flex;
@@ -2542,7 +2522,7 @@ button:disabled {
 .word-cloud-item.size-5 { font-size: 1.4rem; font-weight: 800; }
 
 /* ============================================ */
-/* 뱃지 */
+/* 뱃�? */
 /* ============================================ */
 .badge-item {
     display: flex;
@@ -2560,7 +2540,7 @@ button:disabled {
 [data-theme="dark"] .badge-item { background: var(--bg-soft); }
 
 /* ============================================ */
-/* 과목별 차트 */
+/* 과목�?차트 */
 /* ============================================ */
 .subject-chart { min-height: 80px; }
 .subject-bar-item {
@@ -2597,7 +2577,7 @@ button:disabled {
 }
 
 /* ============================================ */
-/* 감사 그래프 */
+/* 감사 그래??*/
 /* ============================================ */
 .gratitude-chart { min-height: 80px; }
 .gratitude-stat-row {
@@ -2627,7 +2607,7 @@ button:disabled {
 }
 
 /* ============================================ */
-/* 성장 타임라인 */
+/* ?�장 ?�?�라??*/
 /* ============================================ */
 .growth-timeline { min-height: 80px; }
 .timeline-item {
@@ -2675,7 +2655,7 @@ button:disabled {
 }
 
 /* ============================================ */
-/* 요약 리포트 버튼 */
+/* ?�약 리포??버튼 */
 /* ============================================ */
 .summary-period-btn {
     padding: 10px;
@@ -2705,7 +2685,7 @@ button:disabled {
 }
 
 /* ============================================ */
-/* 이용약관 / 개인정보처리방침 모달 스타일 */
+/* ?�용?��? / 개인?�보처리방침 모달 ?��???*/
 /* ============================================ */
 .terms-modal-body {
     text-align: left;
@@ -2782,7 +2762,7 @@ button:disabled {
     margin-bottom: 4px;
 }
 .terms-list li::before {
-    content: '•';
+    content: '??;
     position: absolute;
     left: 0;
     color: var(--primary, #C2654A);
@@ -2839,7 +2819,7 @@ button:disabled {
     background: var(--text-sub, #8A7F76);
 }
 
-/* 다크모드 */
+/* ?�크모드 */
 [data-theme="dark"] .terms-modal-body {
     color: var(--text-main);
 }
@@ -2851,7 +2831,7 @@ button:disabled {
 }
 
 /* ============================================ */
-/* 추가 기능 스타일 (칭찬 우체통, 목표 관리 등) */
+/* 추�? 기능 ?��???(�?�� ?�체?? 목표 관�??? */
 /* ============================================ */
 .target-grid {
     display: grid;
@@ -2979,7 +2959,4 @@ button:disabled {
 }
 
 /* ��ũ ��� ���� */
-[data-theme='dark'] .bottom-nav {
-    background: rgba(30, 30, 30, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
+

@@ -240,7 +240,7 @@ async function saveStudentOnboarding() {
     }
 
     showMsg(msg, '설정이 완료되었습니다!', 'success');
-    window.location.href = window.location.pathname + '?role=student';
+    window.location.href = 'app.html?role=student';
 
   } catch (error) {
     setLoading(false, btn, '설정 완료');
@@ -291,7 +291,7 @@ async function saveTeacherOnboarding() {
     if (profileError) throw profileError;
 
     showMsg(msg, '클래스가 생성되었습니다!', 'success');
-    window.location.href = window.location.pathname + '?role=teacher';
+    window.location.href = 'app.html?role=teacher';
 
   } catch (error) {
     setLoading(false, btn, '클래스 생성하기');
@@ -376,15 +376,8 @@ async function getCompletedTargets(dateStr, reviewerId, reviewType) {
 }
 
 // ============================================
-// 다크모드 & 스크롤
+// 스크롤 효과
 // ============================================
-function toggleTheme() {
-  const html = document.documentElement;
-  const icon = document.getElementById('themeIcon');
-  if (html.getAttribute('data-theme') === 'dark') { html.removeAttribute('data-theme'); icon.textContent = '🌙'; localStorage.setItem('theme', 'light'); }
-  else { html.setAttribute('data-theme', 'dark'); icon.textContent = '☀️'; localStorage.setItem('theme', 'dark'); }
-}
-(function () { if (localStorage.getItem('theme') === 'dark') { document.documentElement.setAttribute('data-theme', 'dark'); document.getElementById('themeIcon').textContent = '☀️'; } })();
 window.addEventListener('scroll', function () { const card = document.querySelector('.card'); if (window.scrollY > 50) card.classList.add('scrolled'); else card.classList.remove('scrolled'); });
 
 // ============================================
@@ -914,37 +907,37 @@ async function generateSummary(reviews) {
 // ============================================
 async function loadTeacherData() {
   try {
-  const dateEl = document.getElementById('teacherDate');
-  if (!dateEl) return;
-  const date = dateEl.value;
+    const dateEl = document.getElementById('teacherDate');
+    if (!dateEl) return;
+    const date = dateEl.value;
 
-  const typeChecked = document.querySelector('input[name="teacherEvalType"]:checked');
-  const type = typeChecked ? typeChecked.value : 'individual';
-  document.getElementById('rankingTable').innerHTML = '<p style="text-align:center;">데이터 불러오는 중...</p>';
-  const results = await Promise.allSettled([getClassSettings(), db.from('reviews').select('*').eq('class_code', currentClassCode).eq('review_date', date).eq('review_type', type)]);
-  const settings = results[0].status === 'fulfilled' ? results[0].value : { studentCount: 30, groupCount: 6 };
-  const reviewsResult = results[1].status === 'fulfilled' ? results[1].value : { data: [] };
-  const totalStudents = type === 'group' ? settings.groupCount : settings.studentCount;
-  const reviews = reviewsResult.data || [];
-  const stats = {}; const allCriteriaSet = new Set();
-  reviews.forEach(row => {
-    const tid = row.target_id; if (!stats[tid]) stats[tid] = { total: 0, count: 0, criteria: {} };
-    const parsed = row.scores_json;
-    if (parsed && parsed.criteria && parsed.scores) {
-      let rowSum = 0, rowCnt = 0;
-      parsed.criteria.forEach((c, index) => { if (!c || String(c).trim() === '') return; allCriteriaSet.add(c); const s = parseInt(parsed.scores[String(index)]) || 0; rowSum += s; rowCnt++; if (!stats[tid].criteria[c]) stats[tid].criteria[c] = { sum: 0, count: 0 }; stats[tid].criteria[c].sum += s; stats[tid].criteria[c].count++; });
-      if (rowCnt > 0) { stats[tid].total += (rowSum / rowCnt); stats[tid].count++; }
-    }
-  });
-  const allCriteriaList = Array.from(allCriteriaSet);
-  const ranking = Object.keys(stats).map(id => { const s = stats[id]; const csm = {}; allCriteriaList.forEach(c => { csm[c] = (s.criteria[c] && s.criteria[c].count > 0) ? s.criteria[c].sum / s.criteria[c].count : 0; }); return { studentId: id, totalAvg: s.count > 0 ? s.total / s.count : 0, count: s.count, criteriaScores: csm }; });
-  ranking.sort((a, b) => b.totalAvg - a.totalAvg); ranking.forEach((r, i) => r.rank = i + 1);
-  const students = Object.keys(stats).sort((a, b) => parseInt(a) - parseInt(b));
-  document.querySelectorAll('#rankingMiniTab .chart-container').forEach(el => el.remove());
-  await renderTeacherDashboard({ ranking, students }, totalStudents);
-  renderRankingTable(ranking, allCriteriaList, type);
-  renderStudentSelector(students);
-  document.getElementById('studentReviews').innerHTML = '';
+    const typeChecked = document.querySelector('input[name="teacherEvalType"]:checked');
+    const type = typeChecked ? typeChecked.value : 'individual';
+    document.getElementById('rankingTable').innerHTML = '<p style="text-align:center;">데이터 불러오는 중...</p>';
+    const results = await Promise.allSettled([getClassSettings(), db.from('reviews').select('*').eq('class_code', currentClassCode).eq('review_date', date).eq('review_type', type)]);
+    const settings = results[0].status === 'fulfilled' ? results[0].value : { studentCount: 30, groupCount: 6 };
+    const reviewsResult = results[1].status === 'fulfilled' ? results[1].value : { data: [] };
+    const totalStudents = type === 'group' ? settings.groupCount : settings.studentCount;
+    const reviews = reviewsResult.data || [];
+    const stats = {}; const allCriteriaSet = new Set();
+    reviews.forEach(row => {
+      const tid = row.target_id; if (!stats[tid]) stats[tid] = { total: 0, count: 0, criteria: {} };
+      const parsed = row.scores_json;
+      if (parsed && parsed.criteria && parsed.scores) {
+        let rowSum = 0, rowCnt = 0;
+        parsed.criteria.forEach((c, index) => { if (!c || String(c).trim() === '') return; allCriteriaSet.add(c); const s = parseInt(parsed.scores[String(index)]) || 0; rowSum += s; rowCnt++; if (!stats[tid].criteria[c]) stats[tid].criteria[c] = { sum: 0, count: 0 }; stats[tid].criteria[c].sum += s; stats[tid].criteria[c].count++; });
+        if (rowCnt > 0) { stats[tid].total += (rowSum / rowCnt); stats[tid].count++; }
+      }
+    });
+    const allCriteriaList = Array.from(allCriteriaSet);
+    const ranking = Object.keys(stats).map(id => { const s = stats[id]; const csm = {}; allCriteriaList.forEach(c => { csm[c] = (s.criteria[c] && s.criteria[c].count > 0) ? s.criteria[c].sum / s.criteria[c].count : 0; }); return { studentId: id, totalAvg: s.count > 0 ? s.total / s.count : 0, count: s.count, criteriaScores: csm }; });
+    ranking.sort((a, b) => b.totalAvg - a.totalAvg); ranking.forEach((r, i) => r.rank = i + 1);
+    const students = Object.keys(stats).sort((a, b) => parseInt(a) - parseInt(b));
+    document.querySelectorAll('#rankingMiniTab .chart-container').forEach(el => el.remove());
+    await renderTeacherDashboard({ ranking, students }, totalStudents);
+    renderRankingTable(ranking, allCriteriaList, type);
+    renderStudentSelector(students);
+    document.getElementById('studentReviews').innerHTML = '';
   } catch (err) {
     console.warn('loadTeacherData 오류:', err);
     document.getElementById('rankingTable').innerHTML = '<p style="text-align:center;color:var(--text-sub);">데이터를 불러오는 중 오류가 발생했습니다. 새로고침해 주세요.</p>';

@@ -764,7 +764,10 @@
 
         // Initialize Supabase
         const { createClient } = supabase;
-        const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+        const db = createClient(SUPABASE_URL, SUPABASE_KEY, {
+            db: { schema: 'public' },
+            auth: { autoRefreshToken: true, persistSession: true }
+        });
 
         // ============================================
         // 약관/개인정보처리방침 데이터
@@ -964,8 +967,10 @@
                     return;
                 }
 
-                // 주소를 동적으로 가져오지 않고 아예 새 주소로 고정하여 튕김 방지
-                const redirectUrl = "https://grow-loop.vercel.app/app.html?role=" + role;
+                // RedirectUrl을 현재 환경에 맞게 동적으로 설정 (사용자 경험 개선)
+                const currentPath = window.location.pathname;
+                const targetPath = currentPath.substring(0, currentPath.lastIndexOf('/') + 1) + 'app.html';
+                const redirectUrl = window.location.origin + targetPath + "?role=" + role;
 
                 const { data, error } = await db.auth.signInWithOAuth({
                     provider: 'google',
@@ -987,10 +992,23 @@
             }
         }
 
-        // 세션 확인 (자동 리다이렉트 하지 않음 - 역할 선택을 위해)
+        // 로그인된 상태라면 자동으로 app.html로 이동
         async function checkSession() {
-            // 역할 전환을 위해 index.html에서는 자동 리다이렉트하지 않음
-            // 사용자가 역할 버튼을 직접 클릭하면 signInWithGoogle()에서 처리
+            try {
+                const { data: { session } } = await db.auth.getSession();
+                if (session) {
+                    const { data: profile } = await db.from('user_profiles')
+                        .select('role')
+                        .eq('google_uid', session.user.id)
+                        .maybeSingle();
+
+                    if (profile) {
+                        window.location.href = 'app.html?role=' + profile.role;
+                    }
+                }
+            } catch (err) {
+                console.error('Session check error:', err);
+            }
         }
         checkSession();
     </script>
