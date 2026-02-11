@@ -23,9 +23,6 @@
             font-family: 'Jua', sans-serif;
             background: linear-gradient(135deg, #FFF9F0 0%, #FFE8F0 100%);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             overflow-y: auto;
         }
 
@@ -648,6 +645,252 @@
         .terms-appendix .terms-article::before {
             background: #8A7F76;
         }
+
+        /* ===== Landing Page Layout ===== */
+        .landing-wrapper {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hero-section {
+            width: 100%;
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 0;
+        }
+
+        /* ===== Features Section ===== */
+        .features-section {
+            width: 100%;
+            padding: 80px 20px;
+            background: white;
+            border-top: 1px solid #f5f5f4;
+        }
+
+        .features-inner {
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            color: #292524;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .section-subtitle {
+            font-size: 1rem;
+            color: #78716c;
+            margin-bottom: 50px;
+            font-weight: 500;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: white;
+            border: 2px solid #f5f5f4;
+            border-radius: 24px;
+            padding: 35px 25px;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 14px 28px rgba(0, 0, 0, 0.08);
+            border-color: #fecdd3;
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .feature-title {
+            font-size: 1.25rem;
+            color: #292524;
+            margin-bottom: 10px;
+        }
+
+        .feature-desc {
+            font-size: 0.9rem;
+            color: #78716c;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .feature-badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 3px 12px;
+            border-radius: 20px;
+        }
+
+        .student-badge {
+            background: #FFF1F2;
+            color: #f43f5e;
+        }
+
+        .teacher-badge {
+            background: #EEF2FF;
+            color: #6366f1;
+        }
+
+        /* ===== Scroll Fade-In Animation ===== */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .fade-in-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .feature-card:nth-child(1) { transition-delay: 0s; }
+        .feature-card:nth-child(2) { transition-delay: 0.1s; }
+        .feature-card:nth-child(3) { transition-delay: 0.2s; }
+        .feature-card:nth-child(4) { transition-delay: 0.3s; }
+        .feature-card:nth-child(5) { transition-delay: 0.4s; }
+        .feature-card:nth-child(6) { transition-delay: 0.5s; }
+
+        /* ===== CTA Section ===== */
+        .cta-section {
+            width: 100%;
+            padding: 80px 20px;
+            background: linear-gradient(135deg, #FFF9F0 0%, #FFE8F0 100%);
+            text-align: center;
+        }
+
+        .cta-inner {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .cta-emoji {
+            font-size: 3.5rem;
+            margin-bottom: 16px;
+            display: inline-block;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .cta-title {
+            font-size: 2rem;
+            color: #292524;
+            margin-bottom: 12px;
+        }
+
+        .cta-subtitle {
+            font-size: 1rem;
+            color: #78716c;
+            margin-bottom: 30px;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 48px;
+            background: linear-gradient(135deg, #fb7185 0%, #f43f5e 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Jua', sans-serif;
+            font-size: 1.15rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(244, 63, 94, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(244, 63, 94, 0.4);
+            filter: brightness(1.05);
+        }
+
+        .cta-button:active {
+            transform: scale(0.97);
+        }
+
+        /* ===== Footer Full Width ===== */
+        .landing-wrapper > .footer {
+            width: 100%;
+            background: white;
+            border-top: 1px solid #f5f5f4;
+            padding: 30px 20px;
+            margin-top: 0;
+        }
+
+        /* ===== Responsive: Tablet ===== */
+        @media (max-width: 768px) {
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+            }
+
+            .section-title,
+            .cta-title {
+                font-size: 1.6rem;
+            }
+
+            .features-section,
+            .cta-section {
+                padding: 60px 16px;
+            }
+
+            .hero-section {
+                min-height: auto;
+                padding: 60px 0 40px;
+            }
+        }
+
+        /* ===== Responsive: Mobile ===== */
+        @media (max-width: 480px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            .feature-card {
+                padding: 25px 20px;
+                border-radius: 20px;
+            }
+
+            .section-title,
+            .cta-title {
+                font-size: 1.4rem;
+            }
+
+            .section-subtitle,
+            .cta-subtitle {
+                font-size: 0.9rem;
+            }
+
+            .cta-button {
+                padding: 14px 36px;
+                font-size: 1rem;
+            }
+
+            .hero-section {
+                min-height: auto;
+                padding: 40px 0 20px;
+            }
+        }
     </style>
     <!-- Noto Sans KR for Modals -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
@@ -658,6 +901,10 @@
     <div class="bg-decoration bg-circle-1"></div>
     <div class="bg-decoration bg-circle-2"></div>
 
+    <div class="landing-wrapper">
+
+    <!-- Hero Section -->
+    <section class="hero-section" id="heroSection">
     <div class="container">
         <div class="card">
             <!-- Logo Section -->
@@ -728,19 +975,81 @@
                 <p>로그인 중...</p>
             </div>
         </div>
+    </div>
+    </section>
 
-        <footer class="footer">
-            <a onclick="openTermsModal()">이용약관</a> |
-            <a onclick="openPrivacyModal()">개인정보처리방침</a>
+    <!-- Features Section -->
+    <section class="features-section" id="featuresSection">
+        <div class="features-inner">
+            <h2 class="section-title">주요 기능</h2>
+            <p class="section-subtitle">학생과 선생님 모두를 위한 성장 도구</p>
+            <div class="features-grid">
+                <div class="feature-card fade-in-up">
+                    <div class="feature-icon">📝</div>
+                    <h3 class="feature-title">성장 일기</h3>
+                    <p class="feature-desc">매일 감사와 배움을 기록하고<br>AI 피드백을 받아요</p>
+                    <span class="feature-badge student-badge">학생</span>
+                </div>
+                <div class="feature-card fade-in-up">
+                    <div class="feature-icon">📊</div>
+                    <h3 class="feature-title">성장 대시보드</h3>
+                    <p class="feature-desc">캘린더, 키워드 구름, 차트로<br>나의 성장을 한눈에</p>
+                    <span class="feature-badge student-badge">학생</span>
+                </div>
+                <div class="feature-card fade-in-up">
+                    <div class="feature-icon">💌</div>
+                    <h3 class="feature-title">칭찬 우체통</h3>
+                    <p class="feature-desc">친구에게 따뜻한 칭찬<br>메시지를 보내고 받아요</p>
+                    <span class="feature-badge student-badge">학생</span>
+                </div>
+                <div class="feature-card fade-in-up">
+                    <div class="feature-icon">🧠</div>
+                    <h3 class="feature-title">성향 진단</h3>
+                    <p class="feature-desc">8개 질문으로 나만의<br>학습 스타일을 발견해요</p>
+                    <span class="feature-badge student-badge">학생</span>
+                </div>
+                <div class="feature-card fade-in-up">
+                    <div class="feature-icon">📋</div>
+                    <h3 class="feature-title">평가 기준 설정</h3>
+                    <p class="feature-desc">AI 자동 생성 또는 직접 설정으로<br>평가 기준을 관리해요</p>
+                    <span class="feature-badge teacher-badge">선생님</span>
+                </div>
+                <div class="feature-card fade-in-up">
+                    <div class="feature-icon">📈</div>
+                    <h3 class="feature-title">평가 분석</h3>
+                    <p class="feature-desc">전체 현황, 개별 피드백,<br>점수 분포를 한눈에 파악</p>
+                    <span class="feature-badge teacher-badge">선생님</span>
+                </div>
+            </div>
+        </div>
+    </section>
 
-            <p>
-                © 2026 GrowLoop. All rights reserved.
-            </p>
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="cta-inner">
+            <div class="cta-emoji">🚀</div>
+            <h2 class="cta-title">지금 바로 시작하세요!</h2>
+            <p class="cta-subtitle">Google 계정 하나로 쉽고 빠르게</p>
+            <button class="cta-button" onclick="document.getElementById('heroSection').scrollIntoView({behavior:'smooth'})">
+                지금 시작하기
+            </button>
+        </div>
+    </section>
 
-            <p>
-                개인정보책임자 김도현 | 문의: dohyun851208@gmail.com
-            </p>
-        </footer>
+    <!-- Footer -->
+    <footer class="footer">
+        <a onclick="openTermsModal()">이용약관</a> |
+        <a onclick="openPrivacyModal()">개인정보처리방침</a>
+
+        <p>
+            © 2026 GrowLoop. All rights reserved.
+        </p>
+
+        <p>
+            개인정보책임자 김도현 | 문의: dohyun851208@gmail.com
+        </p>
+    </footer>
+
     </div>
 
     <!-- Modal Structure -->
@@ -1011,6 +1320,25 @@
             }
         }
         checkSession();
+
+        // Scroll animation for feature cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.15,
+                rootMargin: '0px 0px -50px 0px'
+            });
+
+            document.querySelectorAll('.fade-in-up').forEach(function(el) {
+                observer.observe(el);
+            });
+        });
     </script>
 </body>
 
