@@ -1260,10 +1260,8 @@
                     return;
                 }
 
-                // RedirectUrl을 현재 환경에 맞게 동적으로 설정 (사용자 경험 개선)
-                const currentPath = window.location.pathname;
-                const targetPath = currentPath.substring(0, currentPath.lastIndexOf('/') + 1) + 'app.html';
-                const redirectUrl = window.location.origin + targetPath + "?role=" + role;
+                // RedirectUrl을 origin 기반으로 고정 (모바일/데스크탑 호환)
+                const redirectUrl = window.location.origin + '/app.html?role=' + role;
 
                 const { data, error } = await db.auth.signInWithOAuth({
                     provider: 'google',
