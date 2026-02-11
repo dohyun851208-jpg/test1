@@ -974,13 +974,17 @@
                     return;
                 }
 
-                const origin = window.location.origin;
-                const path = window.location.pathname.split('/').slice(0, -1).join('/');
-                const redirectUrl = `${origin}${path}/app.html?role=${role}`;
+                const redirectUrl = window.location.origin + '/app.html?role=' + role;
 
                 const { data, error } = await db.auth.signInWithOAuth({
                     provider: 'google',
-                    options: { redirectTo: redirectUrl }
+                    options: {
+                        redirectTo: redirectUrl,
+                        queryParams: {
+                            access_type: 'offline',
+                            prompt: 'consent',
+                        }
+                    }
                 });
 
                 if (error) throw error;
