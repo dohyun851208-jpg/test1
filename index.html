@@ -827,15 +827,6 @@
             transform: scale(0.97);
         }
 
-        /* ===== Footer Full Width ===== */
-        .landing-wrapper > .footer {
-            width: 100%;
-            background: white;
-            border-top: 1px solid #f5f5f4;
-            padding: 30px 20px;
-            margin-top: 0;
-        }
-
         /* ===== Responsive: Tablet ===== */
         @media (max-width: 768px) {
             .features-grid {
@@ -975,6 +966,13 @@
                 <p>로그인 중...</p>
             </div>
         </div>
+
+        <footer class="footer">
+            <a onclick="openTermsModal()">이용약관</a> |
+            <a onclick="openPrivacyModal()">개인정보처리방침</a>
+            <p>© 2026 GrowLoop. All rights reserved.</p>
+            <p>개인정보책임자 김도현 | 문의: dohyun851208@gmail.com</p>
+        </footer>
     </div>
     </section>
 
@@ -1035,20 +1033,6 @@
             </button>
         </div>
     </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <a onclick="openTermsModal()">이용약관</a> |
-        <a onclick="openPrivacyModal()">개인정보처리방침</a>
-
-        <p>
-            © 2026 GrowLoop. All rights reserved.
-        </p>
-
-        <p>
-            개인정보책임자 김도현 | 문의: dohyun851208@gmail.com
-        </p>
-    </footer>
 
     </div>
 
