@@ -792,34 +792,51 @@ async function loadStudentSettingsData() {
       empathetic: { icon: '💝', title: '감성형', desc: '공감과 격려를 중시하는 스타일' }
     };
 
-    const p = personalities[personality.personality_type] || { icon: '❓', title: '알 수 없음', desc: '' };
+    const myType = personality.personality_type;
+    const p = personalities[myType] || { icon: '❓', title: '알 수 없음', desc: '' };
 
+    // 나의 유형 강조 표시
     let html = `
-      <div style="text-align:center; padding:15px 0; margin-bottom:15px; background:var(--bg-body); border-radius:14px;">
+      <div style="text-align:center; padding:15px 0; margin-bottom:15px; background:var(--primary-light); border:2px solid var(--primary); border-radius:14px;">
         <div style="font-size:2.5rem; margin-bottom:6px;">${p.icon}</div>
-        <div style="font-weight:700; font-size:1.1rem; color:var(--text-main);">${p.title}</div>
+        <div style="font-weight:700; font-size:1.1rem; color:var(--text-main);">나의 유형: ${p.title}</div>
         <div style="font-size:0.85rem; color:var(--text-sub); margin-top:4px;">${p.desc}</div>
       </div>
     `;
 
-    // 질문별 응답 표시
+    // 전체 유형 비교
+    html += '<div style="font-weight:700; font-size:0.9rem; color:var(--text-main); margin-bottom:10px;">📌 전체 성향 유형</div>';
+    html += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:15px;">';
+    Object.entries(personalities).forEach(([key, val]) => {
+      const isMine = key === myType;
+      html += `<div style="padding:10px; border-radius:12px; text-align:center; ${isMine ? 'background:var(--primary-light); border:2px solid var(--primary);' : 'background:var(--bg-body); border:2px solid transparent; opacity:0.6;'}">
+        <div style="font-size:1.4rem;">${val.icon}</div>
+        <div style="font-weight:700; font-size:0.8rem; color:var(--text-main); margin-top:3px;">${val.title}${isMine ? ' ✓' : ''}</div>
+        <div style="font-size:0.7rem; color:var(--text-sub); margin-top:2px; line-height:1.3;">${val.desc}</div>
+      </div>`;
+    });
+    html += '</div>';
+
+    // 질문별 응답 표시 (선택한 것 + 선택 안 한 것 모두 표시)
     if (personality.question_responses) {
       html += '<div style="font-weight:700; font-size:0.9rem; color:var(--text-main); margin-bottom:10px;">📋 나의 응답</div>';
       personalityQuestions.forEach(q => {
         const answer = personality.question_responses[q.id];
         if (answer) {
           const chosen = answer === 'A' ? q.optionA : q.optionB;
+          const notChosen = answer === 'A' ? q.optionB : q.optionA;
           html += `
             <div style="padding:10px 12px; margin-bottom:8px; background:var(--bg-body); border-radius:10px; font-size:0.82rem;">
-              <div style="color:var(--text-sub); margin-bottom:4px;">Q${q.id}. ${q.question}</div>
-              <div style="color:var(--text-main); font-weight:700;">${answer}. ${chosen.text}</div>
+              <div style="color:var(--text-sub); margin-bottom:6px;">Q${q.id}. ${q.question}</div>
+              <div style="color:var(--primary); font-weight:700;">✓ ${answer}. ${chosen.text}</div>
+              <div style="color:var(--text-sub); opacity:0.5; margin-top:3px; font-size:0.78rem; text-decoration:line-through;">${answer === 'A' ? 'B' : 'A'}. ${notChosen.text}</div>
             </div>
           `;
         }
       });
     }
 
-    html += '<button type="button" onclick="resetPersonalityFromSettings()" style="background:var(--border); color:var(--text-main); font-size:0.85rem; padding:10px 20px; margin-top:12px;">다시 진단하기</button>';
+    html += '<button type="button" onclick="resetPersonalityFromSettings()" style="background:var(--border); color:var(--text-main); font-size:0.85rem; padding:10px 20px; margin-top:12px; border-radius:50px; border:none; font-family:\'Jua\',sans-serif; cursor:pointer;">다시 진단하기</button>';
 
     area.innerHTML = html;
   } catch (err) {
@@ -2547,17 +2564,13 @@ async function submitPersonalityQuiz() {
 
     if (error) throw error;
 
-    studentPersonality = { personality_type: personalityType };
+    studentPersonality = { personality_type: personalityType, question_responses: quizAnswers };
     showPersonalityResult(personalityType);
 
     document.getElementById('personalityQuiz').classList.add('hidden');
     document.getElementById('personalityResult').classList.remove('hidden');
 
-    setTimeout(() => {
-      document.getElementById('personalityResult').classList.add('hidden');
-      document.getElementById('selfEvaluationMenu').classList.remove('hidden');
-      switchSelfTab('daily');
-    }, 4000);
+    // "확인" 버튼으로 넘어가도록 (자동 전환 제거)
 
   } catch (error) {
     showModal({ type: 'alert', icon: '❌', title: '오류', message: '성향 저장 실패: ' + error.message });
@@ -2594,6 +2607,30 @@ function showPersonalityResult(type) {
   document.getElementById('personalityTitle').textContent = p.title;
   document.getElementById('personalityDesc').textContent = p.desc;
   document.getElementById('personalityCard').className = 'accent-box personality-result-card';
+
+  // 다른 유형들도 함께 표시
+  const allContainer = document.getElementById('allPersonalityTypes');
+  if (allContainer) {
+    let html = '<div style="font-weight:700; font-size:0.85rem; color:var(--text-sub); margin-bottom:10px; text-align:center;">📌 모든 성향 유형</div>';
+    html += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">';
+    Object.entries(personalities).forEach(([key, val]) => {
+      const isMine = key === type;
+      html += `<div style="padding:12px; border-radius:12px; text-align:center; ${isMine ? 'background:var(--primary-light); border:2px solid var(--primary);' : 'background:var(--bg-body); border:2px solid transparent; opacity:0.7;'}">
+        <div style="font-size:1.5rem;">${val.icon}</div>
+        <div style="font-weight:700; font-size:0.85rem; color:var(--text-main); margin-top:4px;">${val.title}${isMine ? ' (나)' : ''}</div>
+        <div style="font-size:0.72rem; color:var(--text-sub); margin-top:3px; line-height:1.3;">${val.desc.split('\n')[1] || val.desc}</div>
+      </div>`;
+    });
+    html += '</div>';
+    allContainer.innerHTML = html;
+  }
+}
+
+// 성향 결과 확인 후 메뉴로 이동
+function confirmPersonalityResult() {
+  document.getElementById('personalityResult').classList.add('hidden');
+  document.getElementById('selfEvaluationMenu').classList.remove('hidden');
+  switchSelfTab('daily');
 }
 
 // 재진단

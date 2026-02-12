@@ -138,9 +138,13 @@
                                     style="color:var(--text-sub); margin-top:10px; line-height:1.6;">
                                 </p>
                             </div>
-                            <button onclick="retakePersonalityQuiz()"
-                                style="background:var(--border); color:var(--text-main); font-size:0.85rem; padding:8px 15px;">다시
-                                진단하기</button>
+                            <div id="allPersonalityTypes" style="margin-top:18px;"></div>
+                            <div style="display:flex; gap:10px; justify-content:center; margin-top:18px; flex-wrap:wrap;">
+                                <button onclick="confirmPersonalityResult()"
+                                    style="background:linear-gradient(135deg, #10b981, #059669); color:white; font-size:0.95rem; padding:12px 32px; border-radius:50px; border:none; font-family:'Jua',sans-serif; cursor:pointer;">확인하고 시작하기</button>
+                                <button onclick="resetPersonalityFromSettings()"
+                                    style="background:var(--border); color:var(--text-main); font-size:0.85rem; padding:10px 20px; border-radius:50px; border:none; font-family:'Jua',sans-serif; cursor:pointer;">다시 진단하기</button>
+                            </div>
                         </div>
                     </div>
 
@@ -154,6 +158,7 @@
                         <div class="accent-box box-violet" style="margin-top: 15px; margin-bottom: 20px;">
                             <label>조회/기록 날짜</label>
                             <input type="date" id="selfDate" required
+                                style="width:100%; font-family:'Jua', sans-serif !important; font-size:1.05rem;"
                                 onchange="syncAllDates(this.value); loadDailyReflection()">
                         </div>
 
@@ -161,43 +166,40 @@
                         <div id="dailyReflectionTab">
                             <div class="accent-box box-violet">
                                 <span class="box-label">💝 오늘의 감사</span>
-                                <label>오늘 감사한 것 하나</label>
-                                <div class="guide-buttons"
-                                    style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
-                                    <button type="button" class="template-btn"
-                                        onclick="insertTemplate('🎁 고마웠던 것: \n', 'gratitudeText')">🎁 고마웠던 것</button>
-                                    <button type="button" class="template-btn"
-                                        onclick="insertTemplate('🕰️ 고마웠던 순간/상황: \n', 'gratitudeText')">🕰️ 고마웠던
-                                        순간/상황</button>
-                                    <button type="button" class="template-btn"
-                                        onclick="insertTemplate('💛 그때 든 마음: \n', 'gratitudeText')">💛 그때 든 마음</button>
-                                    <button type="button" class="template-btn"
-                                        onclick="insertTemplate('🔁 내일 해보고 싶은 것: \n', 'gratitudeText')">🔁 내일 해보고 싶은
-                                        것</button>
-                                </div>
-                                <textarea id="gratitudeText" placeholder="예: 친구가 점심을 같이 먹어줘서 감사했어요"
-                                    style="min-height:80px; margin-bottom:10px;"></textarea>
                                 <label style="margin-bottom:8px;">감사 유형 (최대 2개 선택)</label>
-                                <div class="gratitude-tags" style="display:flex; flex-wrap:wrap; gap:8px;">
+                                <div class="gratitude-tags"
+                                    style="display:flex; gap:6px; margin-bottom: 8px; overflow-x: auto; white-space: nowrap; padding-bottom: 4px; padding: 2px;">
                                     <button type="button" class="tag-btn" onclick="toggleGratitudeTag('사람')">👥
                                         사람</button>
                                     <button type="button" class="tag-btn" onclick="toggleGratitudeTag('학교생활')">🏫
                                         학교생활</button>
                                     <button type="button" class="tag-btn" onclick="toggleGratitudeTag('집/일상')">🏠
                                         집/일상</button>
-                                    <button type="button" class="tag-btn" onclick="toggleGratitudeTag('자연/환경')">🌿
-                                        자연/환경</button>
                                     <button type="button" class="tag-btn" onclick="toggleGratitudeTag('나 자신')">💪 나
                                         자신</button>
                                     <button type="button" class="tag-btn" onclick="toggleGratitudeTag('작은 행운')">🍀 작은
                                         행운</button>
                                 </div>
+                                <label>오늘 감사한 것 하나</label>
+                                <div class="guide-buttons"
+                                    style="display:flex; gap:6px; margin-bottom:8px; overflow-x: auto; white-space: nowrap; padding-bottom: 4px; flex-wrap: nowrap; padding: 2px;">
+                                    <button type="button" class="template-btn"
+                                        onclick="insertTemplate('🕰️ 고마웠던 순간/상황: \n', 'gratitudeText')">🕰️ 고마웠던
+                                        순간/상황</button>
+                                    <button type="button" class="template-btn"
+                                        onclick="insertTemplate('🎁 고마웠던 것: \n', 'gratitudeText')">🎁 고마웠던 것</button>
+                                    <button type="button" class="template-btn"
+                                        onclick="insertTemplate('🔁 내일 해보고 싶은 것: \n', 'gratitudeText')">🔁 내일 해보고 싶은
+                                        것</button>
+                                </div>
+                                <textarea id="gratitudeText" placeholder="예: 친구가 점심을 같이 먹어줘서 감사했어요"
+                                    style="min-height:124px; margin-bottom:10px;"></textarea>
                             </div>
                             <div class="accent-box box-blue">
                                 <span class="box-label">📚 오늘의 배움</span>
                                 <label>오늘 배운 것이나 느낀 점</label>
                                 <div class="guide-buttons"
-                                    style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+                                    style="display:flex; gap:6px; margin-bottom:8px; overflow-x: auto; white-space: nowrap; padding-bottom: 4px; flex-wrap: nowrap; padding: 2px;">
                                     <button type="button" class="template-btn"
                                         onclick="insertTemplate('🧠 오늘 배운 것(요약): \n', 'learningText')">🧠 오늘 배운
                                         것(요약)</button>
@@ -210,14 +212,14 @@
                                         onclick="insertTemplate('✅ 내가 잘한 점: \n', 'learningText')">✅ 내가 잘한 점</button>
                                     <button type="button" class="template-btn"
                                         onclick="insertTemplate('❓ 아직 헷갈리는 점: \n', 'learningText')">❓ 아직 헷갈리는 점</button>
-                                    <button type="button" class="template-btn"
-                                        onclick="insertTemplate('🚀 내일 적용할 것: \n', 'learningText')">🚀 내일 적용</button>
+
                                 </div>
                                 <textarea id="learningText"
                                     placeholder="예: 오늘 수학 시간에 분수의 나눗셈을 배웠는데 처음엔 어려웠지만 연습하니까 이해됐다"
-                                    style="min-height:80px; margin-bottom:10px;"></textarea>
+                                    style="min-height:176px; margin-bottom:10px;"></textarea>
                                 <label style="margin-bottom:8px;">과목/활동 태그 (여러 개 선택 가능)</label>
-                                <div class="subject-tags">
+                                <div class="subject-tags"
+                                    style="display:flex; gap:6px; margin-bottom:5px; margin-top:10px; flex-wrap: wrap;">
                                     <button type="button" class="subject-tag-btn" onclick="toggleSubjectTag('국어')">📖
                                         국어</button>
                                     <button type="button" class="subject-tag-btn" onclick="toggleSubjectTag('수학')">🔢
@@ -354,17 +356,9 @@
                                 <span class="box-label">🌟 프로젝트 돌아보기</span>
                                 <label>프로젝트 이름</label>
                                 <input type="text" id="projectName" placeholder="예: 세계 여행 가이드북 만들기">
-                                <label>⭐ 이 활동은 어땠어?</label>
-                                <div class="star-rating">
-                                    <button type="button" class="star-btn" onclick="selectStarRating(1)">★</button>
-                                    <button type="button" class="star-btn" onclick="selectStarRating(2)">★</button>
-                                    <button type="button" class="star-btn" onclick="selectStarRating(3)">★</button>
-                                    <button type="button" class="star-btn" onclick="selectStarRating(4)">★</button>
-                                    <button type="button" class="star-btn" onclick="selectStarRating(5)">★</button>
-                                </div>
-                                <input type="hidden" id="selectedStars" value="0">
+
                                 <div class="guide-buttons"
-                                    style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+                                    style="display:flex; gap:6px; margin-bottom:8px; overflow-x: auto; white-space: nowrap; padding-bottom: 4px; flex-wrap: nowrap; padding: 2px;">
                                     <button type="button" class="template-btn"
                                         onclick="insertTemplate('👍 잘된 점: \n', 'projectComment')">👍 잘된 점</button>
                                     <button type="button" class="template-btn"
@@ -373,15 +367,14 @@
                                     <button type="button" class="template-btn"
                                         onclick="insertTemplate('✨ 인상적인 순간/배운 점: \n', 'projectComment')">✨
                                         인상/배움</button>
-                                    <button type="button" class="template-btn"
-                                        onclick="insertTemplate('🧑🤝🧑 내가 한 역할: \n', 'projectComment')">🧑🤝🧑 내
-                                        역할</button>
+
                                     <button type="button" class="template-btn"
                                         onclick="insertTemplate('💪 다음 도전: \n', 'projectComment')">💪 다음 도전</button>
                                     <button type="button" class="template-btn"
                                         onclick="insertTemplate('🎯 다음을 위한 팁: \n', 'projectComment')">🎯 다음 팁</button>
                                 </div>
-                                <input type="text" id="projectComment" placeholder="이번 프로젝트에서 느낀 점이나 배운 것">
+                                <textarea id="projectComment" placeholder="이번 프로젝트에서 느낀 점이나 배운 것"
+                                    style="min-height:176px; margin-bottom:10px;"></textarea>
                             </div>
                             <button type="button" id="submitProjectBtn" onclick="submitProjectReflection()"
                                 style="background:var(--color-result);">제출</button>
@@ -403,7 +396,9 @@
                     <div id="studentSubmitTab">
                         <form id="reviewForm">
                             <label>평가 날짜</label>
-                            <input type="date" id="reviewDate" required onchange="syncAllDates(this.value)">
+                            <input type="date" id="reviewDate" required
+                                style="width:100%; font-family:'Jua', sans-serif !important; font-size:1.05rem;"
+                                onchange="syncAllDates(this.value)">
                             <div class="type-selector">
                                 <label><input type="radio" name="evalTypeDisplay" value="individual"
                                         onchange="switchTypeAndLogout('individual')"> 👤 개인평가</label>
@@ -447,22 +442,24 @@
                             <div class="accent-box box-green">
                                 <span class="box-label">💬 서로의 발전을 돕는 피드백</span>
                                 <div class="feedback-templates"
-                                    style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
-                                    <button type="button" class="template-btn" onclick="insertTemplate('👍 잘한 점: ')">👍
+                                    style="display:flex; gap:6px; margin-bottom:8px; overflow-x: auto; white-space: nowrap; padding-bottom: 4px; padding: 2px;">
+                                    <button type="button" class="template-btn"
+                                        onclick="insertTemplate('👍 잘한 점: \n')">👍
                                         잘한 점</button>
                                     <button type="button" class="template-btn"
-                                        onclick="insertTemplate('💡 이렇게 하면 더 좋을 것 같아: ')">💡 개선 제안</button>
+                                        onclick="insertTemplate('💡 이렇게 하면 더 좋을 것 같아: \n')">💡 개선 제안</button>
                                     <button type="button" class="template-btn"
-                                        onclick="insertTemplate('✨ 특히 인상적이었던 부분은 ')">✨ 인상적인 부분</button>
+                                        onclick="insertTemplate('✨ 특히 인상적이었던 부분은 \n')">✨ 인상적인 부분</button>
                                     <button type="button" class="template-btn"
-                                        onclick="insertTemplate('💪 다음에는 이런 점을 시도해보면 좋겠어: ')">💪 다음 도전</button>
+                                        onclick="insertTemplate('💪 다음에는 이런 점을 시도해보면 좋겠어: \n')">💪 다음 도전</button>
                                 </div>
                                 <textarea id="reviewContent"
                                     placeholder="위의 평가 기준을 보며, 잘한 점과 특정 부분을 보완하면 더 발전할 수 있는 방법을 구체적으로 써 주세요." required
-                                    minlength="20" oninput="updateCharCount()" style="margin-bottom:5px;"></textarea>
+                                    minlength="100" oninput="updateCharCount()"
+                                    style="margin-bottom:5px; min-height:160px;"></textarea>
                                 <div id="charCount" style="text-align:right; font-size:0.85rem; color:var(--text-sub);">
                                     0자 /
-                                    최소 20자</div>
+                                    최소 100자</div>
                             </div>
                             <button type="submit" id="submitBtn" class="not-ready">평가 제출하기</button>
                         </form>
@@ -478,7 +475,9 @@
                         <div class="accent-box box-amber">
                             <span class="box-label">결과 조회</span>
                             <label>조회 날짜</label>
-                            <input type="date" id="viewDate" required onchange="syncAllDates(this.value)">
+                            <input type="date" id="viewDate" required
+                                style="width:100%; font-family:'Jua', sans-serif !important; font-size:1.05rem;"
+                                onchange="syncAllDates(this.value)">
                             <button type="button" id="viewResultBtn" onclick="viewMyResult()">내 결과 확인하기</button>
                         </div>
                         <div id="viewMsg" class="message"></div>
