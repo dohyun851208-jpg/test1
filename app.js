@@ -24,9 +24,13 @@ let currentClassCode = '';
 let selectedGratitudeTags = [];
 let selectedSubjectTags = [];
 let currentMessageMode = null; // 'anonymous' or 'named'
-let selectedStarCount = 0;
+
 let quizAnswers = {}; // 성향 진단 답변 저장
 let studentPersonality = null; // 학생 성향 정보
+
+// 체험 모드 전역 변수
+let isDemoMode = false;
+let demoRole = null;
 
 
 // ============================================
@@ -36,6 +40,17 @@ let studentPersonality = null; // 학생 성향 정보
 // 페이지 로드 시 인증 및 역할 확인
 async function checkAuthAndRoute() {
   try {
+    // --- 체험 모드 감지 ---
+    const demoParams = new URLSearchParams(window.location.search);
+    const demoParam = demoParams.get('demo');
+    if (demoParam === 'student' || demoParam === 'teacher') {
+      isDemoMode = true;
+      demoRole = demoParam;
+      initDemoMode(demoParam);
+      return;
+    }
+    // --- 체험 모드 감지 끝 ---
+
     const { data, error: authError } = await db.auth.getSession();
     const session = data?.session;
 
@@ -199,8 +214,200 @@ async function checkAuthAndRoute() {
 
 // 구글 로그아웃
 async function logoutGoogle() {
+  if (isDemoMode) {
+    window.location.href = 'index.html';
+    return;
+  }
   await db.auth.signOut();
   window.location.href = 'index.html';
+}
+
+// ============================================
+// 체험 모드 (Demo Mode)
+// ============================================
+
+// 체험용 최소 데이터 골격 (나중에 채울 예정)
+const DEMO_DATA = {
+  classes: [{ class_code: '체험용', class_name: '체험용 학급', student_count: 6, group_count: 2, auto_approve_praise: false, creator_id: 'demo-user' }],
+  user_profiles: [
+    { id: 'demo-p1', google_uid: 'demo-user', google_email: 'demo@growloop.kr', role: 'student', class_code: '체험용', class_name: '체험용 학급', student_number: 1, student_type: 'individual' },
+    { id: 'demo-p2', google_uid: 'demo-s2', google_email: 'student2@demo.kr', role: 'student', class_code: '체험용', class_name: '체험용 학급', student_number: 2, student_type: 'individual' },
+    { id: 'demo-p3', google_uid: 'demo-s3', google_email: 'student3@demo.kr', role: 'student', class_code: '체험용', class_name: '체험용 학급', student_number: 3, student_type: 'individual' },
+    { id: 'demo-p4', google_uid: 'demo-s4', google_email: 'student4@demo.kr', role: 'student', class_code: '체험용', class_name: '체험용 학급', student_number: 4, student_type: 'individual' },
+    { id: 'demo-p5', google_uid: 'demo-s5', google_email: 'student5@demo.kr', role: 'student', class_code: '체험용', class_name: '체험용 학급', student_number: 5, student_type: 'individual' },
+    { id: 'demo-p6', google_uid: 'demo-s6', google_email: 'student6@demo.kr', role: 'student', class_code: '체험용', class_name: '체험용 학급', student_number: 6, student_type: 'individual' },
+  ],
+  objectives: [],
+  tasks: [],
+  rating_criteria: [],
+  reviews: [],
+  daily_reflections: [],
+  praise_messages: [],
+  teacher_messages: [],
+  student_personality: [],
+  student_goals: [],
+  project_reflections: [],
+};
+
+// 체험 모드 DB 프록시 설치 — 모든 write 차단, select는 DEMO_DATA에서 반환
+function installDemoDbProxy() {
+  const originalFrom = db.from.bind(db);
+
+  db.from = function (tableName) {
+    // select 체인 생성
+    function createDemoSelectChain() {
+      const filters = {};
+      const chain = {
+        eq: function (col, val) { filters[col] = String(val); return chain; },
+        neq: function () { return chain; },
+        gt: function () { return chain; },
+        gte: function () { return chain; },
+        lt: function () { return chain; },
+        lte: function () { return chain; },
+        or: function () { return chain; },
+        in: function () { return chain; },
+        is: function () { return chain; },
+        order: function () { return chain; },
+        limit: function () { return chain; },
+        select: function () { return chain; },
+        maybeSingle: function () {
+          const data = getDemoData(tableName, filters);
+          const single = Array.isArray(data) ? (data[0] || null) : data;
+          return Promise.resolve({ data: single, error: null, count: data.length || 0 });
+        },
+        single: function () { return chain.maybeSingle(); },
+        then: function (resolve) {
+          const data = getDemoData(tableName, filters);
+          return resolve({ data: Array.isArray(data) ? data : [], error: null, count: Array.isArray(data) ? data.length : 0 });
+        },
+        catch: function () { return Promise.resolve({ data: [], error: null }); }
+      };
+      return chain;
+    }
+
+    // write 차단용 fake 체인
+    function createFakeWriteChain() {
+      const fakeResult = Promise.resolve({ data: null, error: null, count: 0 });
+      const chainMethods = ['eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'or', 'in', 'is', 'order', 'limit', 'select', 'maybeSingle', 'single'];
+      const fakeChain = {};
+      chainMethods.forEach(m => { fakeChain[m] = function () { return fakeChain; }; });
+      fakeChain.then = function (resolve) { return resolve({ data: null, error: null, count: 0 }); };
+      fakeChain.catch = function () { return Promise.resolve({ data: null, error: null }); };
+      return fakeChain;
+    }
+
+    return {
+      select: function () { return createDemoSelectChain(); },
+      insert: function () { showDemoBlockModal(); return createFakeWriteChain(); },
+      update: function () { showDemoBlockModal(); return createFakeWriteChain(); },
+      upsert: function () { showDemoBlockModal(); return createFakeWriteChain(); },
+      delete: function () { showDemoBlockModal(); return createFakeWriteChain(); },
+    };
+  };
+
+  // auth 메서드 오버라이드
+  db.auth.signOut = () => { window.location.href = 'index.html'; return Promise.resolve(); };
+  db.auth.getUser = () => Promise.resolve({ data: { user: { id: 'demo-user', email: 'demo@growloop.kr' } }, error: null });
+  db.auth.getSession = () => Promise.resolve({ data: { session: { user: { id: 'demo-user', email: 'demo@growloop.kr' } } }, error: null });
+}
+
+// DEMO_DATA에서 필터링하여 데이터 반환
+function getDemoData(tableName, filters) {
+  let data = DEMO_DATA[tableName];
+  if (!data) return [];
+  if (!Array.isArray(data)) data = [data];
+
+  return data.filter(item => {
+    return Object.entries(filters).every(([col, val]) => {
+      if (item[col] === undefined) return true;
+      return String(item[col]) === String(val);
+    });
+  });
+}
+
+// 체험 모드 저장 차단 모달
+function showDemoBlockModal() {
+  // 모달이 이미 열려있으면 스킵
+  const modal = document.getElementById('customModal');
+  if (modal && !modal.classList.contains('hidden')) return;
+  showModal({
+    type: 'alert',
+    icon: '🔒',
+    title: '체험 모드',
+    message: '이 페이지는 체험용이기 때문에<br>저장이 불가능합니다.'
+  });
+}
+
+// 체험 모드 초기화
+function initDemoMode(role) {
+  // DB 프록시 설치
+  installDemoDbProxy();
+
+  // 기본 전역 변수 설정
+  currentClassCode = '체험용';
+
+  // 로딩 화면 숨기기
+  document.getElementById('authLoadingSection').classList.add('hidden');
+
+  if (role === 'student') {
+    // 학생 전역 변수 설정
+    currentStudent = { id: '1', type: 'individual', name: '1' };
+    studentPersonality = null;
+
+    // 학생 UI 표시
+    document.getElementById('studentTab').classList.remove('hidden');
+    document.getElementById('studentMainSection').classList.remove('hidden');
+    document.getElementById('welcomeMsg').textContent = '체험용 1번 학생 환영합니다! (체험 모드)';
+    document.getElementById('reviewerId').value = '1';
+    document.getElementById('submitReviewerLabel').textContent = '나의 번호';
+
+    // 개인 평가 타입 기본 설정
+    const radios = document.getElementsByName('evalTypeDisplay');
+    const resultRadios = document.getElementsByName('resultEvalTypeDisplay');
+    if (radios[0]) radios[0].checked = true;
+    if (resultRadios[0]) resultRadios[0].checked = true;
+
+    // 학생 기본 탭으로 시작
+    switchStudentMainTab('self');
+
+  } else if (role === 'teacher') {
+    // 교사 UI 표시
+    const tTab = document.getElementById('teacherTab');
+    const tMain = document.getElementById('teacherMain');
+    tTab.classList.remove('hidden');
+    tTab.style.display = 'block';
+    tTab.style.opacity = '1';
+    tMain.classList.remove('hidden');
+    tMain.style.display = 'block';
+    tMain.style.opacity = '1';
+
+    // 교사 기본 탭으로 시작
+    setTimeout(() => { switchMiniTab('review'); }, 100);
+  }
+
+  // 체험 모드 배너 추가
+  addDemoBanner(role);
+
+  // 로그아웃 버튼 → 체험 종료로 변경
+  document.querySelectorAll('button[onclick="logoutGoogle()"]').forEach(btn => {
+    btn.textContent = '🏠 체험 종료';
+    btn.onclick = () => { window.location.href = 'index.html'; };
+  });
+}
+
+// 체험 모드 상단 배너
+function addDemoBanner(role) {
+  const banner = document.createElement('div');
+  banner.id = 'demoBanner';
+  banner.style.cssText = 'position:fixed; top:0; left:0; right:0; z-index:10000; ' +
+    'background:linear-gradient(90deg, #fbbf24, #f59e0b); color:#78350f; ' +
+    'text-align:center; padding:10px 16px; font-size:0.85rem; font-weight:700; ' +
+    'font-family:"Jua",sans-serif; box-shadow:0 2px 8px rgba(0,0,0,0.1);';
+  const roleText = role === 'student' ? '학생용' : '교사용';
+  banner.innerHTML = '🎮 체험 모드 (' + roleText + ') - 데이터는 저장되지 않습니다 ' +
+    '<a href="index.html" style="color:#78350f; margin-left:12px; text-decoration:underline; font-weight:700;">돌아가기</a>';
+  document.body.prepend(banner);
+  document.body.style.paddingTop = '42px';
 }
 
 // 학생 온보딩 저장
@@ -621,26 +828,11 @@ async function loadStudentSettingsData() {
   }
 }
 
-// 성향 다시 진단하기 (설정 페이지용)
-async function resetPersonalityFromSettings() {
-  showCustomConfirm('성향을 다시 진단하시겠습니까? 기존 진단 결과는 삭제됩니다.', async () => {
-    try {
-      await db.from('student_personality')
-        .delete()
-        .eq('class_code', currentClassCode)
-        .eq('student_id', currentStudent.id);
 
-      studentPersonality = null;
-      // 탭 전환 및 퀴즈 표시
-      switchStudentMainTab('self');
-    } catch (err) {
-      showModal({ type: 'alert', icon: '❌', title: '오류', message: '초기화 실패: ' + err.message });
-    }
-  });
-}
 
 // 학급 변경 및 데이터 전체 초기화
 async function changeClassAndReset() {
+  if (isDemoMode) { showDemoBlockModal(); return; }
   const newNameInput = document.getElementById('newClassNameInput');
   const newCodeInput = document.getElementById('newClassCodeInput');
   const newName = newNameInput.value.trim();
@@ -712,6 +904,7 @@ async function changeClassAndReset() {
 
 
 async function saveStudentSettings() {
+  if (isDemoMode) { showDemoBlockModal(); return; }
   const newName = document.getElementById('studentSettingClassName').value.trim();
   const newCode = document.getElementById('studentSettingClassCode').value.replace(/\s/g, '');
 
@@ -759,6 +952,7 @@ async function saveStudentSettings() {
 
 // 설정에서 성향 진단 초기화
 async function resetPersonalityFromSettings() {
+  if (isDemoMode) { showDemoBlockModal(); return; }
   showCustomConfirm('성향 진단을 초기화하고 다시 진단하시겠습니까?', async () => {
     try {
       await db.from('student_personality')
@@ -950,8 +1144,8 @@ function insertTemplate(text, targetId = 'reviewContent') {
 function updateCharCount() {
   const len = document.getElementById('reviewContent').value.length;
   const counter = document.getElementById('charCount'); const submitBtn = document.getElementById('submitBtn');
-  counter.textContent = len + '자 / 최소 20자';
-  if (len >= 20) { counter.style.color = 'var(--color-eval)'; submitBtn.classList.add('ready'); submitBtn.classList.remove('not-ready'); }
+  counter.textContent = len + '자 / 최소 100자';
+  if (len >= 100) { counter.style.color = 'var(--color-eval)'; submitBtn.classList.add('ready'); submitBtn.classList.remove('not-ready'); }
   else { counter.style.color = 'var(--text-sub)'; submitBtn.classList.remove('ready'); submitBtn.classList.add('not-ready'); }
 }
 
@@ -986,11 +1180,12 @@ function selectTarget(id, button) { document.querySelectorAll('.target-btn.selec
 // ============================================
 document.getElementById('reviewForm').addEventListener('submit', async (e) => {
   e.preventDefault();
+  if (isDemoMode) { showDemoBlockModal(); return; }
   const btn = document.getElementById('submitBtn'); const msg = document.getElementById('submitMsg');
   const data = { class_code: currentClassCode, review_date: document.getElementById('reviewDate').value, reviewer_id: String(currentStudent.id), target_id: document.getElementById('targetId').value, review_content: document.getElementById('reviewContent').value, scores_json: { criteria: ratingCriteria, scores: currentRatings }, review_type: currentStudent.type, reviewer_email: '' };
   if (!data.target_id) { showMsg(msg, '평가 대상을 선택해주세요.', 'error'); return; }
   if (data.reviewer_id === data.target_id) { showMsg(msg, '자기 자신/모둠은 평가할 수 없습니다.', 'error'); return; }
-  if (data.review_content.trim().length < 20) { showMsg(msg, '피드백은 최소 20자 이상 입력해주세요.', 'error'); return; }
+  if (data.review_content.trim().length < 100) { showMsg(msg, '피드백은 최소 100자 이상 입력해주세요.', 'error'); return; }
   if (ratingCriteria.length > 0 && Object.keys(currentRatings).length !== ratingCriteria.length) { showMsg(msg, '모든 평가 기준에 점수를 선택해주세요.', 'error'); return; }
   setLoading(true, btn, '확인 중...');
   const { data: existing } = await db.from('reviews').select('review_content').eq('class_code', currentClassCode).eq('review_date', data.review_date).eq('reviewer_id', data.reviewer_id).eq('target_id', data.target_id).eq('review_type', data.review_type).maybeSingle();
@@ -1221,6 +1416,7 @@ async function loadClassSettingsUI() {
   }
 }
 function saveClassInfo(btn) {
+  if (isDemoMode) { showDemoBlockModal(); return; }
   const newName = document.getElementById('settingClassName').value.trim();
   const newCode = document.getElementById('settingClassCode').value.replace(/\s/g, '');
 
@@ -1275,6 +1471,7 @@ function saveClassInfo(btn) {
   });
 }
 function saveClassSettingsUI(btn) {
+  if (isDemoMode) { showDemoBlockModal(); return; }
   const sc = parseInt(document.getElementById('settingStudentCount').value) || 30;
   const gc = parseInt(document.getElementById('settingGroupCount').value) || 6;
   showModal({
@@ -1340,6 +1537,7 @@ async function loadCriteriaForEdit() {
   for (let i = 0; i < 6; i++) { document.getElementById('settingRate' + (i + 1)).value = ratings[i] || ''; document.getElementById('autoRate' + (i + 1)).value = ratings[i] || ''; }
 }
 async function saveBasicInfo(btn) {
+  if (isDemoMode) { showDemoBlockModal(); return; }
   const date = document.getElementById('settingDate').value;
   const obj = document.getElementById('settingObjective').value;
   const task = document.getElementById('settingTask').value;
@@ -1351,6 +1549,7 @@ async function saveBasicInfo(btn) {
   showModal({ type: 'alert', icon: '✅', title: '저장 완료', message: '기본 정보가 저장되었습니다.' });
 }
 async function saveDailyCriteria(btn) {
+  if (isDemoMode) { showDemoBlockModal(); return; }
   const date = document.getElementById('settingDate').value;
   const obj = document.getElementById('settingObjective').value;
   const task = document.getElementById('settingTask').value;
@@ -1401,6 +1600,7 @@ async function generateCriteriaAI(btn) {
   } catch (e) { showModal({ type: 'alert', icon: '❌', title: '파싱 실패', message: 'AI 응답을 파싱할 수 없습니다. 다시 시도해주세요.' }); }
 }
 function resetAllReviewData(btn) {
+  if (isDemoMode) { showDemoBlockModal(); return; }
   showModal({
     type: 'prompt', icon: '⚠️', title: '데이터 전체 초기화',
     message: '모든 학급 내 데이터가 영구적으로 삭제됩니다.<br>삭제하려면 아래 입력창에 <strong>초기화</strong>라고 입력하세요.',
@@ -1582,6 +1782,7 @@ async function loadDailyReflection() {
 
 // 데일리 나의 기록 제출
 async function submitDailyReflection() {
+  if (isDemoMode) { showDemoBlockModal(); return; }
   if (!currentStudent || !currentClassCode) {
     showModal({ type: 'alert', icon: '⚠️', title: '오류', message: '로그인이 필요합니다.' });
     return;
@@ -1678,24 +1879,11 @@ async function checkForTeacherReplies() {
 }
 
 // 별점 선택
-function selectStarRating(stars) {
-  selectedStarCount = stars;
-  document.getElementById('selectedStars').value = stars;
 
-  const starBtns = document.querySelectorAll('.star-btn');
-  starBtns.forEach((btn, index) => {
-    if (index < stars) {
-      btn.classList.add('selected');
-    } else {
-      btn.classList.remove('selected');
-    }
-  });
-
-  if (navigator.vibrate) navigator.vibrate(15);
-}
 
 // 프로젝트 나의 기록 제출
 async function submitProjectReflection() {
+  if (isDemoMode) { showDemoBlockModal(); return; }
   if (!currentStudent || !currentClassCode) {
     showModal({ type: 'alert', icon: '⚠️', title: '오류', message: '로그인이 필요합니다.' });
     return;
@@ -1706,11 +1894,6 @@ async function submitProjectReflection() {
 
   if (!projectName) {
     showModal({ type: 'alert', icon: '⚠️', title: '입력 필요', message: '프로젝트 이름을 입력해주세요.' });
-    return;
-  }
-
-  if (selectedStarCount === 0) {
-    showModal({ type: 'alert', icon: '⚠️', title: '입력 필요', message: '별점을 선택해주세요.' });
     return;
   }
 
@@ -1726,7 +1909,7 @@ async function submitProjectReflection() {
       student_id: String(currentStudent.id),
       project_name: projectName,
       reflection_date: targetDate,
-      star_rating: selectedStarCount,
+      star_rating: 0, // 별점 기능 제거로 인한 기본값
       comment: comment || null
     };
 
@@ -1738,17 +1921,14 @@ async function submitProjectReflection() {
     setLoading(false, btn, '제출');
     showMsg(msg, '성공적으로 제출되었습니다! 🌟', 'success');
 
-    // AI 분석 생성
-    const analysis = await generateProjectAnalysis(selectedStarCount);
+    // AI 분석 생성 (랜덤 피드백)
+    const analysis = await generateProjectAnalysis(Math.floor(Math.random() * 5) + 1);
     document.getElementById('projectAIText').textContent = analysis;
     document.getElementById('projectAIAnalysis').classList.remove('hidden');
 
     // 입력 필드 초기화
     document.getElementById('projectName').value = '';
     document.getElementById('projectComment').value = '';
-    selectedStarCount = 0;
-    document.querySelectorAll('.star-btn').forEach(btn => btn.classList.remove('selected'));
-    document.getElementById('selectedStars').value = '0';
 
   } catch (error) {
     setLoading(false, btn, '제출');
@@ -1880,6 +2060,7 @@ function switchPraiseTab(mode) {
 
 // 선생님께 메시지만 전송
 async function submitTeacherMessageOnly() {
+  if (isDemoMode) { showDemoBlockModal(); return; }
   if (!currentStudent || !currentClassCode) {
     showModal({ type: 'alert', icon: '⚠️', title: '오류', message: '로그인이 필요합니다.' });
     return;
@@ -1964,6 +2145,7 @@ function updatePraiseCharCount() {
   document.getElementById('praiseCharCount').style.color = len >= 10 ? 'var(--color-rose)' : 'var(--text-sub)';
 }
 async function sendPraise() {
+  if (isDemoMode) { showDemoBlockModal(); return; }
   const targetId = document.getElementById('praiseTargetId').value;
   const content = document.getElementById('praiseContent').value.trim();
   const isAnon = document.querySelector('input[name="praiseAnon"]:checked').value === 'anonymous';
@@ -2023,10 +2205,12 @@ async function loadPendingPraises() {
   }).join('');
 }
 async function approvePraise(id) {
+  if (isDemoMode) { showDemoBlockModal(); return; }
   await db.from('praise_messages').update({ is_approved: true }).eq('id', id);
   loadPendingPraises(); loadApprovedPraises(); loadPraiseStats();
 }
 async function rejectPraise(id) {
+  if (isDemoMode) { showDemoBlockModal(); return; }
   showCustomConfirm('이 칭찬을 삭제하시겠습니까?', async () => {
     await db.from('praise_messages').delete().eq('id', id);
     loadPendingPraises(); loadPraiseStats();
@@ -2067,6 +2251,7 @@ async function loadAutoApproveStatus() {
 
 // 자동 승인 토글 변경
 async function toggleAutoApprovePraise(el) {
+  if (isDemoMode) { showDemoBlockModal(); el.checked = !el.checked; return; }
   if (!currentClassCode) return;
   const isActive = el.checked;
 
@@ -2338,6 +2523,7 @@ function selectQuizOption(questionId, answer) {
 
 // 성향 진단 제출
 async function submitPersonalityQuiz() {
+  if (isDemoMode) { showDemoBlockModal(); return; }
   const aCount = Object.values(quizAnswers).filter(a => a === 'A').length;
 
   let personalityType;
@@ -2411,12 +2597,7 @@ function showPersonalityResult(type) {
 }
 
 // 재진단
-function retakePersonalityQuiz() {
-  document.getElementById('personalityResult').classList.add('hidden');
-  document.getElementById('selfEvaluationMenu').classList.add('hidden');
-  showPersonalityQuiz();
-  document.getElementById('personalityQuiz').classList.remove('hidden');
-}
+
 
 // ============================================
 // 성장 대시보드 기능
@@ -2474,6 +2655,7 @@ function renderGoals(goals) {
   }).join('');
 }
 async function addGoal() {
+  if (isDemoMode) { showDemoBlockModal(); return; }
   const input = document.getElementById('goalInput');
   const text = input.value.trim();
   if (!text) return;
@@ -2483,10 +2665,12 @@ async function addGoal() {
   loadGoals();
 }
 async function toggleGoal(id, completed) {
+  if (isDemoMode) { showDemoBlockModal(); return; }
   await db.from('student_goals').update({ is_completed: completed, completed_at: completed ? new Date().toISOString() : null }).eq('id', id);
   loadGoals();
 }
 async function deleteGoal(id) {
+  if (isDemoMode) { showDemoBlockModal(); return; }
   await db.from('student_goals').delete().eq('id', id);
   loadGoals();
 }

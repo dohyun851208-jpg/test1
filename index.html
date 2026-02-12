@@ -844,6 +844,101 @@
             transform: scale(0.97);
         }
 
+        /* ===== Demo Section ===== */
+        .demo-section {
+            width: 100%;
+            padding: 80px 20px;
+            background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 50%, #F0FDF4 100%);
+            text-align: center;
+            border-top: 1px solid #e0e7ff;
+        }
+
+        .demo-inner {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .demo-emoji {
+            font-size: 3.5rem;
+            margin-bottom: 16px;
+            display: inline-block;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .demo-title {
+            font-size: 2rem;
+            color: #292524;
+            margin-bottom: 10px;
+        }
+
+        .demo-subtitle {
+            font-size: 1rem;
+            color: #78716c;
+            margin-bottom: 40px;
+        }
+
+        .demo-buttons {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .demo-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 36px;
+            border-radius: 20px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            min-width: 240px;
+            border: 2px solid transparent;
+            background: white;
+        }
+
+        .demo-student-btn {
+            border-color: #fecdd3;
+            color: #292524;
+        }
+
+        .demo-student-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(244, 63, 94, 0.15);
+        }
+
+        .demo-teacher-btn {
+            border-color: #c7d2fe;
+            color: #292524;
+        }
+
+        .demo-teacher-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(99, 102, 241, 0.15);
+        }
+
+        .demo-btn-icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+
+        .demo-btn-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .demo-btn-desc {
+            font-size: 0.85rem;
+            color: #78716c;
+        }
+
+        .demo-notice {
+            margin-top: 30px;
+            font-size: 0.85rem;
+            color: #a8a29e;
+        }
+
         /* ===== Responsive: Tablet ===== */
         @media (max-width: 768px) {
             .features-grid {
@@ -857,8 +952,15 @@
             }
 
             .features-section,
-            .cta-section {
+            .cta-section,
+            .demo-section {
                 padding: 60px 16px;
+            }
+
+            .demo-title,
+            .section-title,
+            .cta-title {
+                font-size: 1.6rem;
             }
 
             .hero-section {
@@ -880,12 +982,14 @@
             }
 
             .section-title,
-            .cta-title {
+            .cta-title,
+            .demo-title {
                 font-size: 1.4rem;
             }
 
             .section-subtitle,
-            .cta-subtitle {
+            .cta-subtitle,
+            .demo-subtitle {
                 font-size: 0.9rem;
             }
 
@@ -897,6 +1001,15 @@
             .hero-section {
                 min-height: auto;
                 padding: 40px 0 20px;
+            }
+
+            .demo-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .demo-btn {
+                min-width: 90%;
             }
         }
     </style>
@@ -1037,6 +1150,28 @@
                         <span class="feature-badge teacher-badge">선생님</span>
                     </div>
                 </div>
+            </div>
+        </section>
+
+        <!-- Demo Section -->
+        <section class="demo-section" id="demoSection">
+            <div class="demo-inner">
+                <div class="demo-emoji">🎮</div>
+                <h2 class="demo-title">먼저 체험해 보세요!</h2>
+                <p class="demo-subtitle">로그인 없이 GrowLoop의 주요 기능을 직접 경험해 보세요</p>
+                <div class="demo-buttons">
+                    <a href="app.html?demo=student" class="demo-btn demo-student-btn fade-in-up">
+                        <span class="demo-btn-icon">🎒</span>
+                        <span class="demo-btn-title">학생용 체험</span>
+                        <span class="demo-btn-desc">성장 일기, 동료 평가, 칭찬 우체통</span>
+                    </a>
+                    <a href="app.html?demo=teacher" class="demo-btn demo-teacher-btn fade-in-up">
+                        <span class="demo-btn-icon">👨‍🏫</span>
+                        <span class="demo-btn-title">교사용 체험</span>
+                        <span class="demo-btn-desc">평가 현황, 기준 설정, 학급 관리</span>
+                    </a>
+                </div>
+                <p class="demo-notice">💡 체험 모드에서는 데이터가 저장되지 않습니다</p>
             </div>
         </section>
 
