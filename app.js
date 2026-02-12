@@ -20,7 +20,7 @@ let ratingCriteria = [];
 let currentStudent = null;
 let currentClassCode = '';
 
-// 나의 기록 전역 변수
+// 자기평가 전역 변수
 let selectedGratitudeTags = [];
 let selectedSubjectTags = [];
 let currentMessageMode = null; // 'anonymous' or 'named'
@@ -114,16 +114,16 @@ async function checkAuthAndRoute() {
       tMain.style.display = 'block';
       tMain.style.opacity = '1';
 
-      // 교사용 메인 화면 진입 시 기본적으로 '너의 조언(review)' 탭을 띄우고 평가 기준 초기화
+      // 교사용 메인 화면 진입 시 기본적으로 '동료평가(review)' 탭을 띄우고 평가 기준 초기화
       setTimeout(() => {
-        switchMiniTab('review');
+        switchMiniTab('diary');
       }, 100);
 
 
 
-      // 기본 탭으로 '너의 조언' 진입 (내부에서 loadTeacherData 호출됨)
+      // 기본 탭으로 '자기평가' 진입
       try {
-        await switchMiniTab('review');
+        await switchMiniTab('diary');
       } catch (dataError) {
         console.warn('교사 데이터 로드 중 일부 오류:', dataError);
       }
@@ -163,7 +163,7 @@ async function checkAuthAndRoute() {
 
       switchStudentMainTab('self');
 
-      // 동료평가 데이터 사전 로드 (실패해도 화면은 유지, 너의 조언 탭 전환 시 재로드됨)
+      // 동료평가 데이터 사전 로드 (실패해도 화면은 유지, 동료평가 탭 전환 시 재로드됨)
       try {
         const initDate = document.getElementById('reviewDate').value;
 
@@ -228,7 +228,7 @@ async function logoutGoogle() {
 
 // 체험용 최소 데이터 골격 (나중에 채울 예정)
 const DEMO_DATA = {
-  classes: [{ class_code: '체험용', class_name: '체험용 학급', student_count: 6, group_count: 2, auto_approve_praise: false, creator_id: 'demo-user' }],
+  classes: [{ class_code: '체험용', class_name: '체험용 학급', student_count: 24, group_count: 6, auto_approve_praise: false, creator_id: 'demo-user' }],
   user_profiles: [
     { id: 'demo-p1', google_uid: 'demo-user', google_email: 'demo@growloop.kr', role: 'student', class_code: '체험용', class_name: '체험용 학급', student_number: 1, student_type: 'individual' },
     { id: 'demo-p2', google_uid: 'demo-s2', google_email: 'student2@demo.kr', role: 'student', class_code: '체험용', class_name: '체험용 학급', student_number: 2, student_type: 'individual' },
@@ -729,7 +729,7 @@ function showCustomConfirm(message, onConfirm, onCancel) { showModal({ type: 'co
 // 탭 전환
 // ============================================
 
-// 학생 메인 탭 선택 (나의 기록 vs 너의 조언)
+// 학생 메인 탭 선택 (자기평가 vs 동료평가)
 function switchStudentMainTab(mode) {
   // 학생용 하단 내비게이션 버튼만 선택
   const btns = document.querySelectorAll('#studentMainSection .bottom-nav .nav-item');
@@ -781,7 +781,7 @@ async function loadStudentSettingsData() {
       .maybeSingle();
 
     if (!personality) {
-      area.innerHTML = '<p style="color:var(--text-sub); text-align:center; padding:20px 0;">아직 진단하지 않았어요.<br>나의 기록 탭에서 진단을 시작해보세요!</p>';
+      area.innerHTML = '<p style="color:var(--text-sub); text-align:center; padding:20px 0;">아직 진단하지 않았어요.<br>자기평가 탭에서 진단을 시작해보세요!</p>';
       return;
     }
 
@@ -829,7 +829,7 @@ async function loadStudentSettingsData() {
             <div style="padding:10px 12px; margin-bottom:8px; background:var(--bg-body); border-radius:10px; font-size:0.82rem;">
               <div style="color:var(--text-sub); margin-bottom:6px;">Q${q.id}. ${q.question}</div>
               <div style="color:var(--primary); font-weight:700;">✓ ${answer}. ${chosen.text}</div>
-              <div style="color:var(--text-sub); opacity:0.5; margin-top:3px; font-size:0.78rem; text-decoration:line-through;">${answer === 'A' ? 'B' : 'A'}. ${notChosen.text}</div>
+              <div style="color:var(--text-sub); opacity:0.5; margin-top:3px; font-size:0.78rem;">${answer === 'A' ? 'B' : 'A'}. ${notChosen.text}</div>
             </div>
           `;
         }
@@ -980,7 +980,7 @@ async function resetPersonalityFromSettings() {
       studentPersonality = null;
       quizAnswers = {};
 
-      // 나의 기록 탭으로 이동 → 퀴즈 표시
+      // 자기평가 탭으로 이동 → 퀴즈 표시
       switchStudentMainTab('self');
     } catch (err) {
       console.error('성향 초기화 오류:', err);
@@ -990,7 +990,7 @@ async function resetPersonalityFromSettings() {
 }
 
 
-// 너의 조언 세부 탭 (평가하기 vs 결과보기)
+// 동료평가 세부 탭 (평가하기 vs 결과보기)
 async function switchPeerTab(mode) {
   const btns = document.querySelectorAll('#peerEvaluationSection .sub-tab-btn');
   document.getElementById('studentSubmitTab').classList.add('hidden');
@@ -1018,7 +1018,7 @@ async function switchPeerTab(mode) {
         const maxCount = currentStudent.type === 'group' ? settings.groupCount : settings.studentCount;
         renderTargetGrid(maxCount, currentStudent.id, completed, currentStudent.type);
       } catch (err) {
-        console.warn('너의 조언 데이터 로드 오류:', err);
+        console.warn('동료평가 데이터 로드 오류:', err);
         // 에러 시에도 기본 그리드는 표시
         try {
           const settings = await getClassSettings();
@@ -1036,7 +1036,7 @@ async function switchPeerTab(mode) {
   }
 }
 
-// 나의 기록 세부 탭 (성장 일기 vs 대시보드 vs 프로젝트)
+// 자기평가 세부 탭 (성장 일기 vs 대시보드 vs 프로젝트)
 function switchSelfTab(mode) {
   const btns = document.querySelectorAll('#selfEvaluationMenu .sub-tab-btn');
   document.getElementById('dailyReflectionTab').classList.add('hidden');
@@ -1675,7 +1675,7 @@ function resetAllReviewData(btn) {
 }
 
 // ============================================
-// 나의 기록 (Self-Evaluation) 기능
+// 자기평가 (Self-Evaluation) 기능
 // ============================================
 
 // 감사 태그 토글
@@ -1748,7 +1748,7 @@ function toggleSubjectTag(tag) {
   if (navigator.vibrate) navigator.vibrate(10);
 }
 
-// 데일리 나의 기록 로드
+// 데일리 자기평가 로드
 async function loadDailyReflection() {
   if (!currentStudent || !currentClassCode) return;
 
@@ -1759,7 +1759,7 @@ async function loadDailyReflection() {
     document.getElementById('selfDate').value = targetDate;
   }
 
-  // 오늘 작성한 나의 기록 있는지 확인
+  // 오늘 작성한 자기평가 있는지 확인
   const { data: reflection } = await db.from('daily_reflections')
     .select('*, teacher_messages(*)')
     .eq('class_code', currentClassCode)
@@ -1797,7 +1797,7 @@ async function loadDailyReflection() {
   await checkForTeacherReplies();
 }
 
-// 데일리 나의 기록 제출
+// 데일리 자기평가 제출
 async function submitDailyReflection() {
   if (isDemoMode) { showDemoBlockModal(); return; }
   if (!currentStudent || !currentClassCode) {
@@ -1898,7 +1898,7 @@ async function checkForTeacherReplies() {
 // 별점 선택
 
 
-// 프로젝트 나의 기록 제출
+// 프로젝트 자기평가 제출
 async function submitProjectReflection() {
   if (isDemoMode) { showDemoBlockModal(); return; }
   if (!currentStudent || !currentClassCode) {
@@ -1968,7 +1968,7 @@ async function generateProjectAnalysis(stars) {
 }
 
 // ============================================
-// 교사용 나의 기록 관리 기능
+// 교사용 자기평가 관리 기능
 // ============================================
 
 // 성장 일기 날짜 초기화
@@ -2441,13 +2441,35 @@ const personalityQuestions = [
   }
 ];
 
-// 나의 기록 초기화
+// 자기평가 초기화
 async function initSelfEvaluation() {
   // 날짜 초기화 (오늘)
   const selfDateInput = document.getElementById('selfDate');
   if (selfDateInput && !selfDateInput.value) {
     const kr = new Date(new Date().getTime() + (9 * 60 * 60 * 1000));
     selfDateInput.value = kr.toISOString().split('T')[0];
+  }
+
+  // 체험 모드: 퀴즈를 ABABABAB으로 미리 세팅
+  if (isDemoMode) {
+    showPersonalityQuiz();
+    // 미리 ABABABAB 답변 세팅 + UI 표시
+    personalityQuestions.forEach(q => {
+      const answer = q.id % 2 === 1 ? 'A' : 'B'; // 홀수=A, 짝수=B
+      quizAnswers[q.id] = answer;
+      const questionEl = document.getElementById(`question${q.id}`);
+      if (questionEl) {
+        questionEl.classList.add('answered');
+        const selectedIndex = answer === 'A' ? 0 : 1;
+        questionEl.querySelectorAll('.quiz-option')[selectedIndex].classList.add('selected');
+      }
+    });
+    // 분석 완료 버튼 바로 표시
+    document.getElementById('submitQuizBtn').classList.remove('hidden');
+    document.getElementById('personalityQuiz').classList.remove('hidden');
+    document.getElementById('personalityResult').classList.add('hidden');
+    document.getElementById('selfEvaluationMenu').classList.add('hidden');
+    return;
   }
 
   try {
@@ -2467,7 +2489,7 @@ async function initSelfEvaluation() {
       document.getElementById('selfEvaluationMenu').classList.add('hidden');
     }
   } catch (error) {
-    console.error('나의 기록 초기화 오류:', error);
+    console.error('자기평가 초기화 오류:', error);
     // 오류 시 퀴즈 화면 표시
     showPersonalityQuiz();
     document.getElementById('personalityQuiz').classList.remove('hidden');
@@ -2522,6 +2544,10 @@ function showPersonalityQuiz() {
 
 // 퀴즈 선택
 function selectQuizOption(questionId, answer) {
+  if (isDemoMode) {
+    showModal({ type: 'alert', icon: '🔒', title: '체험 모드', message: '체험 모드에서는 답변을 변경할 수 없습니다.<br>아래 분석 완료 버튼을 눌러주세요!' });
+    return;
+  }
   quizAnswers[questionId] = answer;
 
   const questionEl = document.getElementById(`question${questionId}`);
@@ -2540,7 +2566,6 @@ function selectQuizOption(questionId, answer) {
 
 // 성향 진단 제출
 async function submitPersonalityQuiz() {
-  if (isDemoMode) { showDemoBlockModal(); return; }
   const aCount = Object.values(quizAnswers).filter(a => a === 'A').length;
 
   let personalityType;
@@ -2555,14 +2580,16 @@ async function submitPersonalityQuiz() {
   }
 
   try {
-    const { error } = await db.from('student_personality').upsert({
-      class_code: currentClassCode,
-      student_id: currentStudent.id,
-      personality_type: personalityType,
-      question_responses: quizAnswers
-    }, { onConflict: 'class_code,student_id' });
-
-    if (error) throw error;
+    // 체험 모드에서는 DB 저장 생략, UI만 진행
+    if (!isDemoMode) {
+      const { error } = await db.from('student_personality').upsert({
+        class_code: currentClassCode,
+        student_id: currentStudent.id,
+        personality_type: personalityType,
+        question_responses: quizAnswers
+      }, { onConflict: 'class_code,student_id' });
+      if (error) throw error;
+    }
 
     studentPersonality = { personality_type: personalityType, question_responses: quizAnswers };
     showPersonalityResult(personalityType);
