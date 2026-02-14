@@ -32,6 +32,22 @@ let studentPersonality = null; // 학생 성향 정보
 let isDemoMode = false;
 let demoRole = null;
 
+function showRoleSelectInApp() {
+  const loadingSec = document.getElementById('authLoadingSection');
+  if (!loadingSec) return;
+  loadingSec.classList.remove('hidden');
+  loadingSec.innerHTML = `
+    <div style="max-width:380px; margin:0 auto; text-align:center; padding:20px;">
+      <h3 style="margin:0 0 10px; color:var(--primary);">역할을 선택해 주세요</h3>
+      <p style="margin:0 0 14px; color:var(--text-sub);">처음 로그인한 계정입니다.</p>
+      <div style="display:grid; gap:10px;">
+        <button type="button" onclick="window.location.href='app.html?role=student'" style="background:var(--color-blue);">학생으로 시작</button>
+        <button type="button" onclick="window.location.href='app.html?role=teacher'" style="background:var(--color-teacher);">교사로 시작</button>
+      </div>
+    </div>
+  `;
+}
+
 
 // ============================================
 // 구글 인증 및 라우팅 (New)
@@ -52,10 +68,36 @@ async function checkAuthAndRoute() {
     // --- 체험 모드 감지 끝 ---
 
     const { data, error: authError } = await db.auth.getSession();
-    const session = data?.session;
+    let session = data?.session;
 
     if (authError) {
       console.error('Auth error:', authError);
+    }
+
+    if (!session) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const hash = window.location.hash || '';
+      const isOAuthCallback = urlParams.has('code') || hash.includes('access_token') || hash.includes('refresh_token');
+      const hasRoleHint = urlParams.has('role');
+
+      // OAuth callback landing can briefly have no session before token persistence completes.
+      if (isOAuthCallback || hasRoleHint) {
+        const loadingSec = document.getElementById('authLoadingSection');
+        if (loadingSec) {
+          loadingSec.classList.remove('hidden');
+          loadingSec.innerHTML = `
+            <div class="spinner" style="display:inline-block; width:40px; height:40px; border:4px solid var(--border); border-top-color:var(--primary); border-radius:50%; animation:spin 1s linear infinite;"></div>
+            <p style="margin-top:15px; color:var(--text-sub);">로그인 확인 중...</p>
+          `;
+        }
+
+        for (let i = 0; i < 4; i++) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+          const { data: retryData } = await db.auth.getSession();
+          session = retryData?.session;
+          if (session) break;
+        }
+      }
     }
 
     if (!session) {
@@ -115,7 +157,7 @@ async function checkAuthAndRoute() {
 
     if (!profile) {
       if (!roleFromUrl) {
-        window.location.href = 'index.html';
+        showRoleSelectInApp();
         return;
       }
 
@@ -260,12 +302,15 @@ async function checkAuthAndRoute() {
 
 // 구글 로그아웃
 async function logoutGoogle() {
-  if (isDemoMode) {
-    window.location.href = 'index.html';
-    return;
+  try {
+    if (!isDemoMode) {
+      await db.auth.signOut();
+    }
+  } catch (error) {
+    console.warn('signOut failed:', error);
+  } finally {
+    window.location.replace('index.html');
   }
-  await db.auth.signOut();
-  window.location.href = 'index.html';
 }
 
 // ============================================
@@ -276,7 +321,7 @@ async function logoutGoogle() {
 const DEMO_DATA = {
   classes: [{ class_code: '체험용', class_name: '체험용 학급', student_count: 24, group_count: 6, auto_approve_praise: false, creator_id: 'demo-user' }],
   user_profiles: [
-    { id: 'demo-p1', google_uid: 'demo-user', google_email: 'demo@growloop.kr', role: 'student', class_code: '체험용', class_name: '체험용 학급', student_number: 1, student_type: 'individual' },
+    { id: 'demo-p1', google_uid: 'demo-user', google_email: 'demo@baeumlog.kr', role: 'student', class_code: '체험용', class_name: '체험용 학급', student_number: 1, student_type: 'individual' },
     { id: 'demo-p2', google_uid: 'demo-s2', google_email: 'student2@demo.kr', role: 'student', class_code: '체험용', class_name: '체험용 학급', student_number: 2, student_type: 'individual' },
     { id: 'demo-p3', google_uid: 'demo-s3', google_email: 'student3@demo.kr', role: 'student', class_code: '체험용', class_name: '체험용 학급', student_number: 3, student_type: 'individual' },
     { id: 'demo-p4', google_uid: 'demo-s4', google_email: 'student4@demo.kr', role: 'student', class_code: '체험용', class_name: '체험용 학급', student_number: 4, student_type: 'individual' },
@@ -352,9 +397,9 @@ function installDemoDbProxy() {
   };
 
   // auth 메서드 오버라이드
-  db.auth.signOut = () => { window.location.href = 'index.html'; return Promise.resolve(); };
-  db.auth.getUser = () => Promise.resolve({ data: { user: { id: 'demo-user', email: 'demo@growloop.kr' } }, error: null });
-  db.auth.getSession = () => Promise.resolve({ data: { session: { user: { id: 'demo-user', email: 'demo@growloop.kr' } } }, error: null });
+  db.auth.signOut = () => { window.location.replace('index.html'); return Promise.resolve(); };
+  db.auth.getUser = () => Promise.resolve({ data: { user: { id: 'demo-user', email: 'demo@baeumlog.kr' } }, error: null });
+  db.auth.getSession = () => Promise.resolve({ data: { session: { user: { id: 'demo-user', email: 'demo@baeumlog.kr' } } }, error: null });
 }
 
 // DEMO_DATA에서 필터링하여 데이터 반환
@@ -437,7 +482,7 @@ function initDemoMode(role) {
   // 로그아웃 버튼 → 체험 종료로 변경
   document.querySelectorAll('button[onclick="logoutGoogle()"]').forEach(btn => {
     btn.textContent = '🏠 체험 종료';
-    btn.onclick = () => { window.location.href = 'index.html'; };
+    btn.onclick = () => { window.location.replace('index.html'); };
   });
 }
 
@@ -3128,12 +3173,12 @@ const TERMS_HTML = `
 <div class="terms-content">
   <div class="terms-section">
     <h3 class="terms-article">제1조 (목적)</h3>
-    <p>본 약관은 김도현(이하 "운영자")이 제공하는 GrowLoop 서비스의 이용과 관련하여 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.</p>
+    <p>본 약관은 김도현(이하 "운영자")이 제공하는 배움로그(BaeumLog) 서비스의 이용과 관련하여 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.</p>
   </div>
 
   <div class="terms-section">
     <h3 class="terms-article">제2조 (서비스 내용)</h3>
-    <p>GrowLoop는 학습 기록 및 동료 평가 기반 성장 관리 서비스입니다.</p>
+    <p>배움로그(BaeumLog)는 학습 기록 및 동료 평가 기반 성장 관리 서비스입니다.</p>
     <ul class="terms-list">
       <li>Google 계정 로그인</li>
       <li>동료 평가 및 피드백</li>
@@ -3186,7 +3231,7 @@ const PRIVACY_HTML = `
 <div class="terms-content">
   <div class="terms-section">
     <h3 class="terms-article">1. 개인정보 처리 목적</h3>
-    <p>GrowLoop는 다음 목적을 위해 개인정보를 처리합니다.</p>
+    <p>배움로그(BaeumLog)는 다음 목적을 위해 개인정보를 처리합니다.</p>
     <ul class="terms-list">
       <li>사용자 인증 및 서비스 제공</li>
       <li>학급 및 학습 활동 관리</li>
@@ -3259,7 +3304,7 @@ function openTermsModal() {
   showModal({
     type: 'alert',
     icon: '📜',
-    title: 'GrowLoop 이용약관',
+    title: '배움로그 이용약관',
     message: `<div class="terms-modal-body">${TERMS_HTML}</div>`
   });
 }
@@ -3268,7 +3313,7 @@ function openPrivacyModal() {
   showModal({
     type: 'alert',
     icon: '🔐',
-    title: 'GrowLoop 개인정보처리방침',
+    title: '배움로그 개인정보처리방침',
     message: `<div class="terms-modal-body">${PRIVACY_HTML}</div>`
   });
 }
