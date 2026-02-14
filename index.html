@@ -1451,26 +1451,6 @@
             }
         }
 
-        // 로그인된 상태라면 자동으로 app.html로 이동
-        async function checkSession() {
-            try {
-                const { data: { session } } = await db.auth.getSession();
-                if (session) {
-                    const { data: profile } = await db.from('user_profiles')
-                        .select('role')
-                        .eq('google_uid', session.user.id)
-                        .maybeSingle();
-
-                    if (profile) {
-                        window.location.href = 'app.html?role=' + profile.role;
-                    }
-                }
-            } catch (err) {
-                console.error('Session check error:', err);
-            }
-        }
-        checkSession();
-
         function scrollToFeatures() {
             const section = document.getElementById('featuresSection');
             if (!section) return;
