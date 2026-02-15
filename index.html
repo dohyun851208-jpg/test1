@@ -678,7 +678,12 @@
         <!-- Top Navigation Bar -->
         <nav class="top-nav" id="topNav">
             <div class="nav-brand" onclick="document.getElementById('heroSection').scrollIntoView({behavior:'smooth'})">
-                BaeumLog
+                <span class="nav-slogan" aria-hidden="true">
+                    <span class="hl-rose">나답게,</span>
+                    <span class="hl-violet">함께,</span>
+                    <span class="hl-teal">AI로</span>
+                </span>
+                <span class="nav-brand-name">BaeumLog</span>
             </div>
             <div class="nav-actions" id="mainSection">
                 <button class="nav-login-btn student-login" onclick="signInWithGoogle('student')">
@@ -728,17 +733,17 @@
                     <div class="stat-item">
                         <span class="stat-emoji">✍️</span>
                         <span class="stat-number" data-target="1247">0</span>
-                        <span class="stat-label">성향분석</span>
+                        <span class="stat-label">배움노트쓰기</span>
                     </div>
                     <div class="stat-item">
                         <span class="stat-emoji">💌</span>
                         <span class="stat-number" data-target="892">0</span>
-                        <span class="stat-label">동료 피드백</span>
+                        <span class="stat-label">동료 피드백 나누기</span>
                     </div>
                     <div class="stat-item">
                         <span class="stat-emoji">🧠</span>
                         <span class="stat-number" data-target="356">0</span>
-                        <span class="stat-label">AI 성장파트너</span>
+                        <span class="stat-label">AI 성장파트너 찾기</span>
                     </div>
                 </div>
                 <div class="hero-cta-group">
@@ -1229,24 +1234,31 @@
             });
 
             // ===== Typing Animation =====
-            const words = ['서로를 응원하고 있어요 💌', '오늘의 배움을 기록하고 있어요 ✍️', '나만의 학습 스타일을 찾고 있어요 🧠', '함께 성장하고 있어요 🌱', '배움을 나누고 있어요 📊'];
+            const words = [
+                { text: '서로를 응원하고 있어요 💌', tone: 'together' },
+                { text: '오늘의 배움을 기록하고 있어요 ✍️', tone: 'self' },
+                { text: '나만의 학습 스타일을 찾고 있어요 🧠', tone: 'self' },
+                { text: '동료 피드백을 나누고 있어요 💌', tone: 'together' },
+                { text: 'AI로 맞춤 피드백을 받고 있어요 🤖', tone: 'ai' }
+            ];
             const typedEl = document.getElementById('typedWord');
             let wordIdx = 0, charIdx = 0, isDeleting = false;
 
             function typeLoop() {
                 if (!typedEl) return;
                 const currentWord = words[wordIdx];
+                typedEl.setAttribute('data-tone', currentWord.tone);
                 if (!isDeleting) {
-                    typedEl.textContent = currentWord.substring(0, charIdx + 1);
+                    typedEl.textContent = currentWord.text.substring(0, charIdx + 1);
                     charIdx++;
-                    if (charIdx === currentWord.length) {
+                    if (charIdx === currentWord.text.length) {
                         isDeleting = true;
                         setTimeout(typeLoop, 1800);
                         return;
                     }
                     setTimeout(typeLoop, 80);
                 } else {
-                    typedEl.textContent = currentWord.substring(0, charIdx - 1);
+                    typedEl.textContent = currentWord.text.substring(0, charIdx - 1);
                     charIdx--;
                     if (charIdx === 0) {
                         isDeleting = false;
