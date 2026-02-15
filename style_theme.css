@@ -41,6 +41,11 @@
     border-radius: 12px;
 }
 
+/* Date inputs should keep a visible outline for scanability (matches self-learning date fields). */
+input[type="date"].class-tone-input {
+    border: 1.5px solid #e7e5e4 !important;
+}
+
 #dailyReflectionTab #learningText {
     background: var(--bg-body) !important;
     border: none !important;
