@@ -3724,10 +3724,10 @@ async function loadTeacherDiaryData() {
   if (!selectedDate) return;
 
   try {
-    // 통계 데이터 로드
-    const [{ data: allReflectionsData }, { data: todayReflectionsData }, settings] = await Promise.all([
+    // "참여현황" + "배움노트 확인"을 조회날짜 기반으로 한 번에 로드
+    const [totalCountRes, selectedDateRes, settings] = await Promise.all([
       db.from('daily_reflections')
-        .select('*')
+        .select('id', { count: 'exact', head: true })
         .eq('class_code', currentClassCode),
       db.from('daily_reflections')
         .select('*')
@@ -3735,15 +3735,20 @@ async function loadTeacherDiaryData() {
         .eq('reflection_date', selectedDate),
       getClassSettings()
     ]);
-    let allReflections = allReflectionsData || [];
-    let todayReflections = todayReflectionsData || [];
-    if (isDemoMode && allReflections.length === 0) {
-      allReflections = getDemoFallbackDailyReflections();
-      todayReflections = allReflections.filter(r => r.reflection_date === selectedDate);
+
+    let totalCount = totalCountRes?.count || 0;
+    let todayReflections = selectedDateRes?.data || [];
+
+    if (isDemoMode) {
+      const allReflections = getDemoFallbackDailyReflections();
+      if (!totalCount) totalCount = allReflections.length;
+      if (!todayReflections || todayReflections.length === 0) {
+        todayReflections = allReflections.filter(r => r.reflection_date === selectedDate);
+      }
     }
 
     // 통계 업데이트
-    document.getElementById('totalReflections').textContent = allReflections?.length || 0;
+    document.getElementById('totalReflections').textContent = totalCount || 0;
     document.getElementById('todayReflections').textContent = todayReflections?.length || 0;
     renderDiaryCompletionStatus(todayReflections || [], settings?.studentCount || 30, selectedDate);
 
