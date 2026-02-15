@@ -22,6 +22,14 @@
     animation: float 3s ease-in-out infinite;
 }
 
+.app-brand-icon {
+    width: 1.35em;
+    height: 1.35em;
+    object-fit: contain;
+    vertical-align: -0.18em;
+    margin-right: 0.28em;
+}
+
 :root {
     /* 핵심 브랜드 컬러 (랜딩 페이지 기반) */
     --primary: #f43f5e;
@@ -220,6 +228,19 @@ button[onclick*="logout"]:hover {
 .accent-box.box-violet {
     border-color: #e7e5e4 !important;
     background: #ffffff !important;
+}
+
+/* Student pages: neutralize rose-tinted cards to class-name color tone */
+#studentMainSection .accent-box.box-rose,
+#studentMainSection #streakBadgeArea {
+    border-color: #e7e5e4 !important;
+    border-left-color: var(--text-main) !important;
+    background: #ffffff !important;
+}
+
+#studentMainSection .accent-box.box-rose .box-label,
+#studentMainSection #streakBadgeArea .box-label {
+    color: var(--text-main) !important;
 }
 
 /* Requested neutral border unification (same as praise-send card) */
@@ -864,6 +885,7 @@ input:checked+.switch-slider:before {
 }
 
 /* Teacher dashboard: hide "today diary writing rate" card in overall status */
-#teacherDashboard .stat-card[style*="--color-rose"] {
+#teacherDashboard .stat-card[style*="--color-rose"],
+#teacherDashboard .stat-card[style*="--color-teacher"] {
     display: none !important;
 }

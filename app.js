@@ -36,6 +36,66 @@ let isDemoMode = false;
 let demoRole = null;
 const DEMO_FIXED_QUERY_DATE = '2026-03-01';
 const DEMO_PERSONALITY_STORAGE_KEY = 'demo_student_personality_v1';
+const DEMO_FALLBACK_DATA = {
+  daily_reflections: [
+    { id: 'demo-dr-1', class_code: '체험용', student_id: '1', reflection_date: '2026-03-01', learning_text: '오늘은 세계사 시간에 산업혁명 이후 사회 변화 흐름을 정리했다. 원인과 결과를 연결해서 설명하니 더 잘 이해됐다.', subject_tags: ['사회', '세계사', '토론'], gratitude_text: '발표할 때 친구들이 끝까지 들어줘서 고마웠다.' },
+    { id: 'demo-dr-2', class_code: '체험용', student_id: '1', reflection_date: '2026-02-28', learning_text: '수학에서 비례식 문제를 단계별로 풀어보며 실수를 줄였다. 중간 계산을 메모하니 정확도가 올라갔다.', subject_tags: ['수학'] },
+    { id: 'demo-dr-3', class_code: '체험용', student_id: '1', reflection_date: '2026-02-27', learning_text: '국어 시간에 설명문 구조를 분석하고 핵심 문장을 찾아 요약했다. 문단별 중심 생각을 구분하는 연습이 도움이 됐다.', subject_tags: ['국어'] },
+    { id: 'demo-dr-4', class_code: '체험용', student_id: '1', reflection_date: '2026-02-26', learning_text: '과학 실험에서 증발 속도 차이를 관찰했다. 변인을 하나씩 통제해야 결과를 비교할 수 있다는 점을 이해했다.', subject_tags: ['과학', '실험'] },
+    { id: 'demo-dr-5', class_code: '체험용', student_id: '1', reflection_date: '2026-02-25', learning_text: '영어로 일상 표현을 역할극으로 연습했다. 발음이 어색한 부분은 친구 피드백을 받고 다시 말해보며 고쳤다.', subject_tags: ['영어', '발표'] },
+    { id: 'demo-dr-6', class_code: '체험용', student_id: '1', reflection_date: '2026-02-24', learning_text: '모둠활동에서 역할을 나눠 자료를 정리했다. 시간 배분을 먼저 정하니 마무리가 훨씬 수월했다.', subject_tags: ['모둠활동', '실과'] },
+    { id: 'demo-dr-7', class_code: '체험용', student_id: '1', reflection_date: '2026-02-23', learning_text: '미술 시간에 색 대비를 활용해 포스터를 만들었다. 강조하고 싶은 요소를 중심으로 배치하니 전달력이 좋아졌다.', subject_tags: ['미술'] },
+    { id: 'demo-dr-8', class_code: '체험용', student_id: '1', reflection_date: '2026-02-22', learning_text: '체육에서 팀 전략을 맞추며 협력의 중요성을 느꼈다. 서로 신호를 미리 정한 것이 경기 운영에 도움이 됐다.', subject_tags: ['체육'] },
+    { id: 'demo-dr-9', class_code: '체험용', student_id: '1', reflection_date: '2026-02-21', learning_text: '도덕 시간에 갈등 상황 사례를 토의했다. 상대 입장을 먼저 확인하면 오해를 줄일 수 있다는 점이 기억에 남는다.', subject_tags: ['도덕', '토론'] },
+    { id: 'demo-dr-10', class_code: '체험용', student_id: '1', reflection_date: '2026-02-20', learning_text: '사회 시간에 세계사 연표를 다시 정리했다. 사건의 순서와 연결 관계를 시각화하니 암기가 쉬워졌다.', subject_tags: ['사회', '세계사'] },
+    { id: 'demo-dr-11', class_code: '체험용', student_id: '2', reflection_date: '2026-03-01', learning_text: '오늘 발표가 잘 안 돼서 조금 속상했지만 친구들이 응원해줘서 다시 해볼 용기가 생겼다.', subject_tags: ['발표'] },
+    { id: 'demo-dr-12', class_code: '체험용', student_id: '3', reflection_date: '2026-03-01', learning_text: '수학 문제를 다시 풀면서 틀린 이유를 찾았다. 아직 걱정되는 문제 유형이 있어서 복습이 필요하다.', subject_tags: ['수학'] },
+    { id: 'demo-dr-13', class_code: '체험용', student_id: '4', reflection_date: '2026-03-01', learning_text: '과학 실험 결과를 정리했는데 생각보다 헷갈려서 좀 힘들었다. 그래도 모둠원이 도와줘서 끝까지 정리했다.', subject_tags: ['과학', '모둠활동'] },
+    { id: 'demo-dr-14', class_code: '체험용', student_id: '5', reflection_date: '2026-03-01', learning_text: '영어 단어를 문장으로 만들어 외우니 기억이 오래갔다. 내일은 듣기 연습을 더 해보려고 한다.', subject_tags: ['영어'] },
+    { id: 'demo-dr-15', class_code: '체험용', student_id: '6', reflection_date: '2026-03-01', learning_text: '국어 토론에서 근거를 먼저 제시하는 연습을 했다. 다음에는 반박 질문에도 차분히 답해보고 싶다.', subject_tags: ['국어', '토론'] }
+  ],
+  student_goals: {
+    '1': [
+      { id: 'demo-goal-1', class_code: '체험용', student_id: '1', goal_text: '세계사 연표 10개 사건을 원인-결과로 설명하기', goal_type: 'weekly', is_completed: true, created_at: '2026-02-24T09:00:00+09:00' },
+      { id: 'demo-goal-2', class_code: '체험용', student_id: '1', goal_text: '수학 서술형에서 풀이 과정을 빠짐없이 쓰기', goal_type: 'weekly', is_completed: false, created_at: '2026-02-25T09:00:00+09:00' },
+      { id: 'demo-goal-3', class_code: '체험용', student_id: '1', goal_text: '매주 4회 이상 배움 일기 작성하기', goal_type: 'monthly', is_completed: false, created_at: '2026-02-20T09:00:00+09:00' }
+    ]
+  },
+  teacher_messages: [
+    { id: 'demo-tm-1', class_code: '체험용', student_id: '1', is_anonymous: false, message_content: '세계사 발표에서 근거를 더 자신 있게 말하고 싶어요. 연습 방법이 궁금해요.', has_reply: true, created_at: '2026-03-01T09:40:00+09:00', daily_reflections: { reflection_date: '2026-03-01' }, teacher_replies: [{ reply_content: '핵심 문장을 3개로 줄여 먼저 말해보세요. 1분 발표를 녹음해서 속도와 발음을 확인하면 훨씬 좋아집니다.' }] },
+    { id: 'demo-tm-2', class_code: '체험용', student_id: null, is_anonymous: true, message_content: '최근 발표할 때 긴장감이 커졌어요. 발표 전 루틴을 알려주세요.', has_reply: false, created_at: '2026-03-01T08:25:00+09:00', daily_reflections: { reflection_date: '2026-03-01' }, teacher_replies: [] },
+    { id: 'demo-tm-3', class_code: '체험용', student_id: '3', is_anonymous: false, message_content: '수학에서 비례식 단원을 복습 중인데 검산 습관을 어떻게 들이면 좋을까요?', has_reply: false, created_at: '2026-03-01T08:55:00+09:00', daily_reflections: { reflection_date: '2026-03-01' }, teacher_replies: [] }
+  ]
+};
+
+function getDemoFallbackDailyReflections(studentId = null) {
+  const sid = studentId == null ? null : String(studentId);
+  const rows = DEMO_FALLBACK_DATA.daily_reflections.filter(r => r.class_code === '체험용' && (sid ? String(r.student_id) === sid : true));
+  return rows.map(r => ({ ...r }));
+}
+
+function getDemoFallbackDailyReflectionByDate(studentId, dateStr) {
+  return getDemoFallbackDailyReflections(studentId).find(r => r.reflection_date === dateStr) || null;
+}
+
+function getDemoFallbackGoals(studentId) {
+  const sid = String(studentId);
+  const goals = DEMO_FALLBACK_DATA.student_goals[sid] || [];
+  return goals.map(g => ({ ...g }));
+}
+
+function getDemoFallbackTeacherMessages(selectedDate, studentId = null) {
+  const sid = studentId == null ? null : String(studentId);
+  const msgs = DEMO_FALLBACK_DATA.teacher_messages.filter(m => {
+    if (m.class_code !== '체험용') return false;
+    if (sid && String(m.student_id) !== sid) return false;
+    if (!selectedDate) return true;
+    return String(m.created_at || '').startsWith(selectedDate);
+  });
+  return msgs
+    .map(m => ({ ...m, daily_reflections: m.daily_reflections ? { ...m.daily_reflections } : null, teacher_replies: Array.isArray(m.teacher_replies) ? m.teacher_replies.map(r => ({ ...r })) : [] }))
+    .sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
+}
 
 function loadDemoPersonalityFromStorage() {
   try {
@@ -100,7 +160,7 @@ function ensureCustomSubjectInput() {
   const input = document.createElement('input');
   input.type = 'text';
   input.id = 'customSubjectInput';
-  input.placeholder = '기타 활동을 직접 입력하세요 (예: 물리, 코딩, 미적분)';
+  input.placeholder = '기타 활동을 직접 입력하세요 (예: 물리, 세계사, 미적분)';
   input.style.width = '100%';
   input.style.boxSizing = 'border-box';
   input.style.padding = '10px 12px';
@@ -1274,6 +1334,7 @@ async function switchMiniTab(mode) {
     document.getElementById('rankStudentArea').style.display = 'none';
     const el = document.getElementById('praiseMiniTab'); el.classList.remove('hidden', 'tab-content'); void el.offsetWidth; el.classList.add('tab-content');
     loadPraiseStats(); loadPendingPraises(); loadApprovedPraises(); loadAutoApproveStatus(); initMessageDate(); loadTeacherMessages();
+    switchTeacherPraiseSubTab('praise');
   } else if (mode === 'settings') {
     mainTabBtns[3].classList.add('active-nav');
     document.getElementById('rankStudentArea').style.display = 'none';
@@ -1591,6 +1652,29 @@ function repairMojibakeText(text) {
   return text;
 }
 
+function switchTeacherPraiseSubTab(mode) {
+  const praiseBtn = document.getElementById('teacherPraiseManageBtn');
+  const letterBtn = document.getElementById('teacherLetterManageBtn');
+  const praisePanel = document.getElementById('teacherPraiseManagePanel');
+  const letterPanel = document.getElementById('teacherLetterManagePanel');
+  if (!praiseBtn || !letterBtn || !praisePanel || !letterPanel) return;
+
+  praiseBtn.classList.remove('active');
+  letterBtn.classList.remove('active');
+  praisePanel.classList.add('hidden');
+  letterPanel.classList.add('hidden');
+
+  if (mode === 'letter') {
+    letterBtn.classList.add('active');
+    letterPanel.classList.remove('hidden');
+    loadTeacherMessages();
+    return;
+  }
+
+  praiseBtn.classList.add('active');
+  praisePanel.classList.remove('hidden');
+}
+
 async function callGemini(promptText, config = {}) {
   try {
     const res = await fetch('/api/gemini', {
@@ -1689,9 +1773,15 @@ async function renderTeacherDashboard(data, totalStudents) {
       ]);
       diaryCount = diaryRes.status === 'fulfilled' && diaryRes.value.count ? diaryRes.value.count : 0;
       msgCount = msgRes.status === 'fulfilled' && msgRes.value.count ? msgRes.value.count : 0;
+      if (isDemoMode && diaryCount === 0) {
+        diaryCount = getDemoFallbackDailyReflections().filter(r => r.reflection_date === today).length;
+      }
+      if (isDemoMode && msgCount === 0) {
+        msgCount = getDemoFallbackTeacherMessages(today).filter(m => !m.has_reply).length;
+      }
     } catch (subErr) { console.warn('대시보드 부가 데이터 조회 오류:', subErr); }
     const diaryPct = totalStudents > 0 ? Math.round((diaryCount / totalStudents) * 100) : 0;
-    d.innerHTML = '<div class="stat-card"><span class="stat-number">' + participation + '%</span><span class="stat-label">평가 참여율 (' + evaluated + '/' + totalStudents + ')</span></div><div class="stat-card blue"><span class="stat-number">' + totalAvg + '</span><span class="stat-label">전체 평균 점수</span></div><div class="stat-card" style="border-left-color:var(--color-teal);"><span class="stat-number" style="color:var(--color-teal);">' + totalReviews + '건</span><span class="stat-label">총 평가 수</span></div><div class="stat-card" style="border-left-color:var(--color-rose);"><span class="stat-number" style="color:var(--color-rose);">' + diaryPct + '%</span><span class="stat-label">오늘 일기 작성률 (' + diaryCount + '/' + totalStudents + ')</span></div>' + (msgCount > 0 ? '<div class="stat-card" style="border-left-color:#e67e22;"><span class="stat-number" style="color:#e67e22;">' + msgCount + '건</span><span class="stat-label">미답변 메시지</span></div>' : '');
+  d.innerHTML = '<div class="stat-card"><span class="stat-number">' + participation + '%</span><span class="stat-label">평가 참여율 (' + evaluated + '/' + totalStudents + ')</span></div><div class="stat-card blue"><span class="stat-number">' + totalAvg + '</span><span class="stat-label">전체 평균 점수</span></div><div class="stat-card" style="border-left-color:var(--color-teal);"><span class="stat-number" style="color:var(--color-teal);">' + totalReviews + '건</span><span class="stat-label">총 평가 수</span></div><div class="stat-card" style="border-left-color:var(--color-teacher);"><span class="stat-number" style="color:var(--color-teacher);">' + diaryPct + '%</span><span class="stat-label">오늘 일기 작성률 (' + diaryCount + '/' + totalStudents + ')</span></div>' + (msgCount > 0 ? '<div class="stat-card" style="border-left-color:#e67e22;"><span class="stat-number" style="color:#e67e22;">' + msgCount + '건</span><span class="stat-label">미답변 메시지</span></div>' : '');
   } catch (err) {
     console.warn('renderTeacherDashboard 오류:', err);
     d.innerHTML = '<div class="stat-card"><span class="stat-number">-</span><span class="stat-label">데이터 로드 실패</span></div>';
@@ -1727,11 +1817,11 @@ function renderScoreDistribution(ranking, type) {
 
   const maxBin = Math.max(...bins, 1);
   const colorPairs = [
-    ['#C96D6D', '#E29A7D'],
-    ['#C78B4A', '#E4BF79'],
-    ['#5FA584', '#8CCDA9'],
-    ['#4B88B7', '#79B4DC'],
-    ['#7566C9', '#A191E5']
+    ['#D77A86', '#E8A5AF'],
+    ['#D39A5E', '#E9C18E'],
+    ['#6FAF8C', '#9CCCB1'],
+    ['#5F97C4', '#8ABCE0'],
+    ['#7E7ACF', '#A9A3E6']
   ];
 
   let h = '<div class="chart-container" style="border-left-color:var(--color-blue);margin-top:20px;"><h4 style="color:var(--color-blue);">' + (type === 'group' ? '\uBAA8\uB46C' : '\uAC1C\uC778') + ' \uD3C9\uADE0 \uC810\uC218 \uBD84\uD3EC</h4><div class="bar-chart">';
@@ -2246,12 +2336,16 @@ async function loadDailyReflection() {
   }
 
   // 오늘 작성한 자기평가 있는지 확인
-  const { data: reflection } = await db.from('daily_reflections')
+  const { data: reflectionData } = await db.from('daily_reflections')
     .select('*, teacher_messages(*)')
     .eq('class_code', currentClassCode)
     .eq('student_id', String(currentStudent.id))
     .eq('reflection_date', targetDate)
     .maybeSingle();
+  let reflection = reflectionData;
+  if (!reflection && isDemoMode) {
+    reflection = getDemoFallbackDailyReflectionByDate(currentStudent.id, targetDate);
+  }
 
   if (reflection) {
     document.getElementById('learningText').value = reflection.learning_text || '';
@@ -2363,10 +2457,14 @@ async function generateAiFeedback(learning, subjects) {
 async function checkForTeacherReplies() {
   if (!currentStudent || !currentClassCode) return;
 
-  const { data: messages } = await db.from('teacher_messages')
+  const { data: messageRows } = await db.from('teacher_messages')
     .select('id, message_content, teacher_replies(*)')
     .eq('class_code', currentClassCode)
     .eq('student_id', String(currentStudent.id));
+  let messages = messageRows || [];
+  if (isDemoMode && messages.length === 0) {
+    messages = getDemoFallbackTeacherMessages(null, currentStudent.id);
+  }
 
   if (!messages || messages.length === 0) return;
 
@@ -2470,14 +2568,20 @@ async function loadTeacherDiaryData() {
 
   try {
     // 통계 데이터 로드
-    const { data: allReflections } = await db.from('daily_reflections')
+    const { data: allReflectionsData } = await db.from('daily_reflections')
       .select('*')
       .eq('class_code', currentClassCode);
 
-    const { data: todayReflections } = await db.from('daily_reflections')
+    const { data: todayReflectionsData } = await db.from('daily_reflections')
       .select('*')
       .eq('class_code', currentClassCode)
       .eq('reflection_date', selectedDate);
+    let allReflections = allReflectionsData || [];
+    let todayReflections = todayReflectionsData || [];
+    if (isDemoMode && allReflections.length === 0) {
+      allReflections = getDemoFallbackDailyReflections();
+      todayReflections = allReflections.filter(r => r.reflection_date === selectedDate);
+    }
 
     // 통계 업데이트
     document.getElementById('totalReflections').textContent = allReflections?.length || 0;
@@ -2505,13 +2609,16 @@ async function loadTeacherMessages() {
   if (!selectedDate) return;
 
   try {
-    const { data: messages } = await db.from('teacher_messages')
+    const { data: messageRows } = await db.from('teacher_messages')
       .select('*, daily_reflections(reflection_date)')
       .eq('class_code', currentClassCode)
       .gte('created_at', selectedDate + 'T00:00:00')
       .lt('created_at', selectedDate + 'T23:59:59.999')
       .order('created_at', { ascending: false });
-
+    let messages = messageRows || [];
+    if (isDemoMode && messages.length === 0) {
+      messages = getDemoFallbackTeacherMessages(selectedDate);
+    }
     renderMessageList(messages || []);
   } catch (error) {
     console.error('Error loading messages:', error);
@@ -2672,7 +2779,7 @@ async function loadReceivedPraises() {
   container.innerHTML = praises.map(p => {
     const sender = p.is_anonymous ? '🎭 익명의 친구' : (p.sender_id + '번 친구');
     const date = new Date(p.created_at).toLocaleDateString('ko-KR');
-    return '<div style="padding:12px;background:var(--bg-body);border-radius:10px;border-left:3px solid var(--color-rose);margin-bottom:10px;"><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-weight:700;color:var(--color-rose);">' + sender + '</span><span style="font-size:0.8rem;color:var(--text-sub);">' + date + '</span></div><div style="color:var(--text-main);line-height:1.6;">' + escapeHtml(p.message_content) + '</div></div>';
+    return '<div style="padding:12px;background:var(--bg-body);border-radius:10px;border-left:3px solid var(--color-teacher);margin-bottom:10px;"><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-weight:700;color:var(--color-teacher);">' + sender + '</span><span style="font-size:0.8rem;color:var(--text-sub);">' + date + '</span></div><div style="color:var(--text-main);line-height:1.6;">' + escapeHtml(p.message_content) + '</div></div>';
   }).join('');
 }
 
@@ -2772,7 +2879,7 @@ function renderEmotionAlerts(reflections) {
   });
   if (alerts.length === 0) { area.classList.add('hidden'); return; }
   area.classList.remove('hidden');
-  list.innerHTML = alerts.map(a => '<div style="padding:10px;background:var(--bg-body);border-radius:8px;border-left:3px solid var(--color-rose);margin-bottom:8px;"><div style="font-weight:700;margin-bottom:4px;">' + a.studentId + '번 학생</div><div style="font-size:0.83rem;color:var(--text-sub);margin-bottom:4px;">' + escapeHtml(a.text) + (a.text.length >= 80 ? '...' : '') + '</div><div>' + a.keywords.map(k => '<span style="display:inline-block;padding:2px 8px;background:#fee2e2;color:#dc2626;border-radius:10px;font-size:0.75rem;margin:2px;">' + k + '</span>').join('') + '</div></div>').join('');
+  list.innerHTML = alerts.map(a => '<div style="padding:10px;background:var(--bg-body);border-radius:8px;border-left:3px solid var(--color-teacher);margin-bottom:8px;"><div style="font-weight:700;margin-bottom:4px;">' + a.studentId + '번 학생</div><div style="font-size:0.83rem;color:var(--text-sub);margin-bottom:4px;">' + escapeHtml(a.text) + (a.text.length >= 80 ? '...' : '') + '</div><div>' + a.keywords.map(k => '<span style="display:inline-block;padding:2px 8px;background:#eef2ff;color:#4f46e5;border-radius:10px;font-size:0.75rem;margin:2px;">' + k + '</span>').join('') + '</div></div>').join('');
 }
 
 // 메시지 목록 렌더링
@@ -3153,11 +3260,16 @@ async function loadDashboardData() {
   if (!currentStudent || !currentClassCode) return;
 
   try {
-    const { data: allRecords } = await db.from('daily_reflections')
+    const { data: recordRows } = await db.from('daily_reflections')
       .select('*')
       .eq('class_code', currentClassCode)
       .eq('student_id', String(currentStudent.id))
       .order('reflection_date', { ascending: false });
+    let allRecords = recordRows || [];
+    if (isDemoMode && allRecords.length === 0) {
+      allRecords = getDemoFallbackDailyReflections(currentStudent.id)
+        .sort((a, b) => String(b.reflection_date).localeCompare(String(a.reflection_date)));
+    }
 
     loadGoals(); // 기록이 없어도 목표는 로드
     if (!allRecords || allRecords.length === 0) {
@@ -3216,11 +3328,16 @@ async function deleteGoal(id) {
 
 async function loadGoals() {
   if (!currentStudent || !currentClassCode) return;
-  const { data: goals } = await db.from('student_goals')
+  const { data: goalRows } = await db.from('student_goals')
     .select('*')
     .eq('class_code', currentClassCode)
     .eq('student_id', String(currentStudent.id))
     .order('created_at', { ascending: false });
+  let goals = goalRows || [];
+  if (isDemoMode && goals.length === 0) {
+    goals = getDemoFallbackGoals(currentStudent.id)
+      .sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
+  }
 
   const goalList = document.getElementById('goalList');
   const goalProgress = document.getElementById('goalProgress');

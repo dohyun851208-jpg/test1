@@ -5,7 +5,7 @@
     <base target="_top">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
-    <title>레코드</title>
+    <title>배움로그</title>
     <link rel="icon" type="image/png" href="images/Gemini_Generated_Image_d19ctrd19ctrd19c.png">
     <link rel="apple-touch-icon" href="images/Gemini_Generated_Image_d19ctrd19ctrd19c.png">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -27,7 +27,7 @@
 
         <!-- 학생 온보딩 (첫 사용자) -->
         <div id="studentOnboardingSection" class="hidden">
-            <h1><span class="floating-emoji">🌱</span> 레코드</h1>
+            <h1><img class="floating-emoji app-brand-icon" src="images/Gemini_Generated_Image_d19ctrd19ctrd19c-removebg-preview.png" alt="배움로그 아이콘"> 배움로그</h1>
             <div style="display:flex; justify-content:flex-end; align-items:center; margin-bottom:20px;">
                 <button onclick="logoutGoogle()"
                     style="width:auto; padding:6px 12px; font-size:0.8rem; background:#C8C1B8; color:var(--text-main); box-shadow:none;">로그아웃</button>
@@ -55,7 +55,7 @@
 
         <!-- 교사 온보딩 (첫 사용자) -->
         <div id="teacherOnboardingSection" class="hidden">
-            <h1><span class="floating-emoji">🌱</span> 레코드</h1>
+            <h1><img class="floating-emoji app-brand-icon" src="images/Gemini_Generated_Image_d19ctrd19ctrd19c-removebg-preview.png" alt="배움로그 아이콘"> 배움로그</h1>
             <div style="display:flex; justify-content:flex-end; align-items:center; margin-bottom:20px;">
                 <button onclick="logoutGoogle()"
                     style="width:auto; padding:6px 12px; font-size:0.8rem; background:#C8C1B8; color:var(--text-main); box-shadow:none;">로그아웃</button>
@@ -79,7 +79,7 @@
 
         <!-- 학생 메인 (기존 사용자 / 온보딩 후) -->
         <div id="studentTab" class="hidden">
-            <h1><span class="floating-emoji">🌱</span> 레코드</h1>
+            <h1><img class="floating-emoji app-brand-icon" src="images/Gemini_Generated_Image_d19ctrd19ctrd19c-removebg-preview.png" alt="배움로그 아이콘"> 배움로그</h1>
             <div id="studentMainSection" class="hidden">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                     <span id="welcomeMsg" style="font-weight:700; color:var(--primary); font-size:1.1rem;"></span>
@@ -245,7 +245,7 @@
                         <!-- 성장 대시보드 탭 -->
                         <div id="dashboardTab" class="hidden">
                             <!-- 연속 기록 스트릭 & 뱃지 -->
-                            <div id="streakBadgeArea" class="accent-box box-rose" style="text-align:center;">
+                            <div id="streakBadgeArea" class="accent-box" style="text-align:center;">
                                 <div id="streakDisplay" style="font-size:1.3rem; font-weight:700; margin-bottom:10px;">
                                 </div>
                                 <div id="badgeContainer"
@@ -300,12 +300,12 @@
                             </div>
                             <!-- AI 성장 리포트 -->
                             <div class="accent-box"
-                                style="border-left-color: #FF6B6B; background:linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%);">
-                                <span class="box-label" style="color:#FF6B6B;">⭐ AI 성장 리포트</span>
+                                style="border-left-color: var(--text-main); background:var(--bg-body);">
+                                <span class="box-label" style="color:var(--text-main);">⭐ AI 성장 리포트</span>
                                 <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:15px;">나의 전체 기록을 분석해서
                                     성장 포인트를 알려줘요!</p>
                                 <button type="button" onclick="generateGrowthReport()" id="growthReportBtn"
-                                    style="background:linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%); margin-bottom:15px;">🤖
+                                    style="background:var(--text-main); margin-bottom:15px;">🤖
                                     AI 성장 리포트 받기</button>
                                 <div id="growthReportArea">
                                     <div class="empty-state"><span class="empty-icon">⭐</span>
@@ -468,7 +468,7 @@
                         <button class="sub-tab-btn" onclick="switchPraiseTab('teacher')">💌 선생님께 편지</button>
                     </div>
                     <div id="praiseSendTab">
-                        <div class="accent-box box-rose">
+                        <div class="accent-box">
                             <span class="box-label">💌 친구에게 칭찬 보내기</span>
                             <label>받는 친구 번호</label>
                             <div id="praiseTargetGrid" class="target-grid" style="margin-bottom:15px;"></div>
@@ -596,7 +596,7 @@
 
         <!-- 교사 메인 (기존 사용자 / 온보딩 후) -->
         <div id="teacherTab" class="hidden">
-            <h1><span class="floating-emoji">🌱</span> 레코드</h1>
+            <h1><img class="floating-emoji app-brand-icon" src="images/Gemini_Generated_Image_d19ctrd19ctrd19c-removebg-preview.png" alt="배움로그 아이콘"> 배움로그</h1>
             <div id="teacherMain" class="hidden">
                 <div style="display:flex; justify-content:flex-end; gap:10px; margin-bottom:15px;">
                     <button onclick="logoutGoogle()"
@@ -703,7 +703,7 @@
                             </div>
                         </div>
                     </div>
-                    <div id="emotionAlertArea" class="accent-box box-rose hidden">
+                    <div id="emotionAlertArea" class="accent-box box-violet hidden">
                         <span class="box-label">🚨 관심이 필요한 학생</span>
                         <p style="font-size:0.82rem; color:var(--text-sub); margin-bottom:10px;">감정 키워드가 감지된 기록이
                             있습니다.
@@ -721,7 +721,7 @@
                     <div id="teacherPraiseManagePanel">
                     <!-- 자동 승인 설정 -->
                     <div class="accent-box praise-approval-card"
-                        style="margin-bottom:15px; padding:15px; display:flex; justify-content:space-between; align-items:center; border-color:var(--color-rose);">
+                        style="margin-bottom:15px; padding:15px; display:flex; justify-content:space-between; align-items:center; border-color:var(--color-teacher);">
                         <div style="display:flex; align-items:center; gap:8px;">
                             <span style="font-size:1.2rem;">✨</span>
                             <div>
@@ -741,8 +741,8 @@
                     <div id="praiseStatsArea" class="praise-stats-container"
                         style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
                         <div class="stat-card"
-                            style="flex:1; min-width:100px; text-align:center; padding:14px; background:rgba(255,182,193,0.15); border-radius:12px; border:1px solid rgba(255,182,193,0.3);">
-                            <div style="font-size:1.5rem; font-weight:700; color:var(--color-rose);"
+                            style="flex:1; min-width:100px; text-align:center; padding:14px; background:rgba(99,102,241,0.10); border-radius:12px; border:1px solid rgba(99,102,241,0.20);">
+                            <div style="font-size:1.5rem; font-weight:700; color:var(--color-teacher);"
                                 id="praiseTotalCount">-
                             </div>
                             <div style="font-size:0.78rem; color:var(--text-sub);">전체 칭찬</div>
@@ -762,7 +762,7 @@
                         </div>
                     </div>
                     <!-- 대기 중인 칭찬 -->
-                    <div class="accent-box box-rose">
+                    <div class="accent-box box-violet">
                         <span class="box-label">⏳ 승인 대기 중인 칭찬</span>
                         <div id="pendingPraiseList">
                             <div class="empty-state"><span class="empty-icon">💌</span>
@@ -979,4 +979,5 @@
 </body>
 
 </html>
+
 
