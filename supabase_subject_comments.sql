@@ -3,8 +3,7 @@
 --
 -- 이 프로젝트(app.js)는 아래 컬럼/테이블을 사용합니다.
 -- - classes: school_level, semester1_start, semester1_end, semester2_start, semester2_end
--- - subject_comments: class_code, student_id, semester, subject, school_level, period_start, period_end, note_count, generated_text
-
+-- - subject_comments: class_code, student_id, semester, subject, school_level, period_start, period_end, note_count, generated_text, created_by
 -- 1) classes 테이블에 설정 컬럼 추가
 alter table public.classes
   add column if not exists school_level text;
@@ -27,10 +26,15 @@ create table if not exists public.subject_comments (
   period_end date null,
   note_count integer not null default 0,
   generated_text text not null,
+  created_by uuid null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint subject_comments_unique unique (class_code, student_id, semester, subject)
 );
+
+-- If the table already exists from a previous run, add the missing column safely.
+alter table public.subject_comments
+  add column if not exists created_by uuid;
 
 create index if not exists subject_comments_class_code_idx
   on public.subject_comments (class_code);

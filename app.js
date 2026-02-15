@@ -42,6 +42,7 @@ let studentPersonality = null; // 학생 성향 정보
 // 체험 모드 전역 변수
 let isDemoMode = false;
 let demoRole = null;
+let demoLiveReads = false; // demo_live=1: read from Supabase (still blocks writes)
 const DEMO_FIXED_QUERY_DATE = '2026-03-01';
 const DEMO_PERSONALITY_STORAGE_KEY = 'demo_student_personality_v1';
 const DEMO_FALLBACK_DATA = {
@@ -268,10 +269,12 @@ async function checkAuthAndRoute() {
     // --- 체험 모드 감지 ---
     const demoParams = new URLSearchParams(window.location.search);
     const demoParam = demoParams.get('demo');
+    const demoLiveParam = demoParams.get('demo_live');
     if (demoParam === 'student' || demoParam === 'teacher') {
       isDemoMode = true;
       demoRole = demoParam;
-      initDemoMode(demoParam);
+      demoLiveReads = demoLiveParam === '1';
+      initDemoMode(demoParam, { liveReads: demoLiveReads });
       return;
     }
     // --- 체험 모드 감지 끝 ---
@@ -614,7 +617,8 @@ function buildDemoReviewRows() {
 DEMO_DATA.reviews = buildDemoReviewRows();
 
 // 체험 모드 DB 프록시 설치 — 모든 write 차단, select는 DEMO_DATA에서 반환
-function installDemoDbProxy() {
+function installDemoDbProxy(options = {}) {
+  const liveReads = options.liveReads === true;
   const originalFrom = db.from.bind(db);
 
   db.from = function (tableName) {
@@ -662,7 +666,9 @@ function installDemoDbProxy() {
 
     return {
       select: function (...args) {
-        if (tableName === 'reviews') return createDemoSelectChain();
+        // Demo mode defaults to mock reviews so the page works without DB/RLS setup.
+        // Use `app.html?demo=student&demo_live=1` (or teacher) to read from Supabase instead.
+        if (tableName === 'reviews' && !liveReads) return createDemoSelectChain();
         return originalFrom(tableName).select(...args);
       },
       insert: function () { showDemoBlockModal(); return createFakeWriteChain(); },
@@ -706,9 +712,9 @@ function showDemoBlockModal() {
 }
 
 // 체험 모드 초기화
-function initDemoMode(role) {
+function initDemoMode(role, options = {}) {
   // DB 프록시 설치
-  installDemoDbProxy();
+  installDemoDbProxy(options);
   syncAllDates(DEMO_FIXED_QUERY_DATE);
 
   // 기본 전역 변수 설정
@@ -772,7 +778,8 @@ function addDemoBanner(role) {
     'text-align:center; padding:10px 16px; font-size:0.85rem; font-weight:700; ' +
     'font-family:"Jua",sans-serif; box-shadow:0 2px 8px rgba(0,0,0,0.1);';
   const roleText = role === 'student' ? '학생용' : '교사용';
-  banner.innerHTML = '🎮 체험 모드 (' + roleText + ') - 데이터는 저장되지 않습니다 ' +
+  const liveBadge = demoLiveReads ? ' LIVE' : '';
+  banner.innerHTML = '🎮 체험 모드 (' + roleText + ')' + liveBadge + ' - 데이터는 저장되지 않습니다 ' +
     '<a href="index.html" style="color:#78350f; margin-left:12px; text-decoration:underline; font-weight:700;">돌아가기</a>';
   document.body.prepend(banner);
   document.body.style.paddingTop = '42px';
@@ -4860,4 +4867,5 @@ function openPrivacyModal() {
     message: `<div class="terms-modal-body">${PRIVACY_HTML}</div>`
   });
 }
+
 

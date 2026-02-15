@@ -6,7 +6,9 @@
   "main": "app.js",
   "scripts": {
     "test": "playwright test",
-    "seed": "node seed_supabase_demo.js"
+    "seed": "node seed_supabase_demo.js",
+    "supabase:check": "node check_seed_2026-03-01.js",
+    "supabase:check:compare": "node check_seed_2026-03-01_compare.js"
   },
   "keywords": [],
   "author": "",
