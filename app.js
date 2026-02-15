@@ -3752,8 +3752,8 @@ async function loadTeacherDiaryData() {
     document.getElementById('todayReflections').textContent = todayReflections?.length || 0;
     renderDiaryCompletionStatus(todayReflections || [], settings?.studentCount || 30, selectedDate);
 
-    // 감정 키워드 알림 감지
-    renderEmotionAlerts(todayReflections || []);
+    // 미해결 어려움 알림(조회날짜 기반)
+    renderEmotionAlerts(todayReflections || [], selectedDate);
 
   } catch (error) {
     console.error('Error loading diary data:', error);
@@ -4122,23 +4122,119 @@ async function toggleAutoApprovePraise(el) {
   }
 }
 
-// 감정 키워드 알림
-function renderEmotionAlerts(reflections) {
+function extractUnresolvedDifficultySnippets(text) {
+  const raw = String(text || '').replace(/\r\n/g, '\n');
+  const t = raw.trim();
+  if (!t) return [];
+
+  const clip = (s, n = 70) => {
+    const x = String(s || '').replace(/\s+/g, ' ').trim();
+    if (!x) return '';
+    return x.length > n ? (x.slice(0, n) + '...') : x;
+  };
+
+  const takeLabel = (re) => {
+    const m = t.match(re);
+    if (!m) return '';
+    return clip(m[1], 90);
+  };
+
+  const hasStill = /아직\s*(도)?|여전히|계속/.test(t);
+  const hasResolution = /이해\s*\/\s*해결\s*방법\s*:|해결\s*방법\s*:|해결했|해결했다|알게\s*되|이해했|정리(했|해서|하니)|고쳤|찾았/.test(t);
+
+  const snippets = [];
+  const stillConfusing = takeLabel(/아직\s*헷갈리는\s*점\s*:\s*([^\n]+)/);
+  if (stillConfusing) snippets.push(stillConfusing);
+
+  // "어려웠던 점"은 해결 섹션이 없거나, 아직/여전히 표현이 함께 있을 때만 미해결로 간주
+  const hardPoint = takeLabel(/어려웠던\s*점\s*:\s*([^\n]+)/);
+  if (hardPoint && (!hasResolution || hasStill)) snippets.push(hardPoint);
+
+  // 일반 텍스트: 미해결 키워드가 있는 문장만 (최대 2개)
+  if (snippets.length === 0) {
+    const unresolvedRe = /(아직|헷갈|어렵|모르겠|이해가\s*안|이해가\s*잘\s*안|잘\s*안\s*되|막혔|실수(가\s*)?자주)/;
+    const resolvedRe = /(해결|알게\s*되|이해했|정리(했|해서|하니)|고쳤|찾았)/;
+
+    const parts = t.split(/\n+|[.!?]\s+/).map(s => s.trim()).filter(Boolean);
+    for (const p of parts) {
+      if (!unresolvedRe.test(p)) continue;
+      if (resolvedRe.test(p)) continue;
+      snippets.push(clip(p, 90));
+      if (snippets.length >= 2) break;
+    }
+  }
+
+  // Dedup
+  return Array.from(new Set(snippets)).filter(Boolean);
+}
+
+function focusTeacherDiaryStudent(studentId) {
+  const sid = String(studentId || '').trim();
+  if (!sid) return;
+  try {
+    const listEl = document.getElementById('diaryCompletionList');
+    if (listEl) {
+      const btn = Array.from(listEl.querySelectorAll('button')).find(b => (b.textContent || '').includes(sid + '번'));
+      if (btn) { btn.click(); return; }
+    }
+  } catch (_) {}
+
+  // Fallback: at least sync the subject-comment selected student pill if available.
+  if (typeof setTeacherSubjectCommentSelectedStudent === 'function') {
+    setTeacherSubjectCommentSelectedStudent(sid);
+  }
+}
+
+// "관심이 필요한 학생" (기존: 감정 키워드) -> "미해결 어려움" 기반
+function renderEmotionAlerts(reflections, selectedDate = null) {
   const area = document.getElementById('emotionAlertArea');
   const list = document.getElementById('emotionAlertList');
-  const keywords = ['힘들', '슬프', '슬퍼', '외로', '무서', '불안', '걱정', '싫어', '짜증', '화가', '울고', '울었', '죽고', '포기', '미워', '괴롭', '아프', '속상', '우울', '두려'];
-  const alerts = [];
-  reflections.forEach(r => {
-    const texts = [r.learning_text || ''].join(' ');
-    const found = keywords.filter(k => texts.includes(k));
-    if (found.length > 0) alerts.push({ studentId: r.student_id, keywords: found, text: texts.substring(0, 80) });
+  if (!area || !list) return;
+
+  const dateStr = selectedDate || document.getElementById('diaryViewDate')?.value || '';
+
+  const byStudent = new Map();
+  (reflections || []).forEach(r => {
+    const sid = String(r.student_id || '').trim();
+    if (!sid) return;
+
+    const snippets = extractUnresolvedDifficultySnippets(r.learning_text || '');
+    if (snippets.length === 0) return;
+
+    const existing = byStudent.get(sid) || { studentId: sid, tags: [], snippets: [] };
+    const tags = Array.isArray(r.subject_tags) ? r.subject_tags.map(x => String(x)) : [];
+    existing.tags = Array.from(new Set(existing.tags.concat(tags))).slice(0, 6);
+    existing.snippets = Array.from(new Set(existing.snippets.concat(snippets))).slice(0, 3);
+    byStudent.set(sid, existing);
   });
+
+  const alerts = Array.from(byStudent.values()).sort((a, b) => Number(a.studentId) - Number(b.studentId));
   if (alerts.length === 0) { area.classList.add('hidden'); return; }
+
   area.classList.remove('hidden');
   const stripeColors = ['#5f97c4', '#7e7acf', '#6faf8c'];
   list.innerHTML = alerts.map((a, idx) => {
+    const sidSafe = String(a.studentId || '').replace(/[^0-9]/g, '');
     const stripe = stripeColors[idx % stripeColors.length];
-    return '<div style="padding:10px;background:#ffffff;border-radius:8px;border:1.5px solid #d1d5db;border-left:4px solid ' + stripe + ';margin-bottom:8px;"><div style="font-weight:700;margin-bottom:4px;">' + a.studentId + '번 학생</div><div style="font-size:0.83rem;color:var(--text-sub);margin-bottom:4px;">' + escapeHtml(a.text) + (a.text.length >= 80 ? '...' : '') + '</div><div>' + a.keywords.map(k => '<span style="display:inline-block;padding:2px 8px;background:#eef2ff;color:#4f46e5;border-radius:10px;font-size:0.75rem;margin:2px;">' + k + '</span>').join('') + '</div></div>';
+    const tagHtml = (a.tags || []).map(tag => '<span style="display:inline-block;padding:2px 8px;background:#ecfeff;color:#155e75;border-radius:999px;font-size:0.72rem;margin:2px;">' + escapeHtml(tag) + '</span>').join('');
+    const snipHtml = (a.snippets || []).slice(0, 2).map(s => '<li style="margin:2px 0;">' + escapeHtml(s) + '</li>').join('');
+
+    const subtitle = dateStr ? (escapeHtml(dateStr) + ' 기준') : '선택 날짜 기준';
+
+    return (
+      '<button type="button" onclick="focusTeacherDiaryStudent(\'' + sidSafe + '\')" ' +
+      'style="width:100%; text-align:left; padding:10px; background:#ffffff; border-radius:10px; border:1.5px solid #d1d5db; border-left:4px solid ' + stripe + '; margin-bottom:8px; cursor:pointer;">' +
+      '<div style="display:flex; justify-content:space-between; gap:10px; align-items:center; margin-bottom:6px;">' +
+      '<div style="font-weight:800;">' + escapeHtml(a.studentId) + '번 학생</div>' +
+      '<div style="font-size:0.75rem; color:var(--text-sub);">' + subtitle + '</div>' +
+      '</div>' +
+      (tagHtml ? ('<div style="margin-bottom:6px;">' + tagHtml + '</div>') : '') +
+      '<div style="font-size:0.86rem; color:var(--text-main); line-height:1.45;">' +
+      '<div style="font-weight:700; margin-bottom:4px;">미해결 어려움</div>' +
+      '<ul style="margin:0; padding-left:18px;">' + snipHtml + '</ul>' +
+      '</div>' +
+      '</button>'
+    );
   }).join('');
 }
 
