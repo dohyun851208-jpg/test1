@@ -195,6 +195,11 @@ body {
     100% { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes softAppear {
+    0% { opacity: 0; filter: blur(2px); }
+    100% { opacity: 1; filter: blur(0); }
+}
+
 @keyframes brandGlowPulse {
     0% { opacity: 0; transform: scale(.95); }
     50% { opacity: 1; transform: scale(1.02); }
@@ -541,7 +546,7 @@ body {
 
 /* Typing Area - Bright glassmorphism (compact) */
 .hero-typing-area {
-    animation: lowerFadeIn .6s var(--hero-lower-delay) ease-out both;
+    animation: softAppear .9s calc(var(--hero-lower-delay) + 1.5s) ease-out both;
     margin-top: 28px;
     height: 44px;
     display: flex;

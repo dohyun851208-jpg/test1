@@ -541,6 +541,70 @@ const DEMO_DATA = {
   project_reflections: [],
 };
 
+const DEMO_REVIEW_CRITERIA = ['근거 제시', '경청 태도', '표현의 명확성', '협력 기여'];
+
+function createDemoScoreJson(scores) {
+  const scoreObj = {};
+  scores.forEach((s, idx) => { scoreObj[String(idx)] = s; });
+  return { criteria: DEMO_REVIEW_CRITERIA.slice(), scores: scoreObj };
+}
+
+function buildDemoReviewsByTargets({ type, targetCount, reviewerCount, patterns }) {
+  const rows = [];
+  for (let target = 1; target <= targetCount; target++) {
+    const baseScores = patterns[(target - 1) % patterns.length];
+    for (let k = 0; k < reviewerCount; k++) {
+      let reviewer = ((target + (k + 1) * 5 - 1) % targetCount) + 1;
+      if (reviewer === target) reviewer = (reviewer % targetCount) + 1;
+      rows.push({
+        id: `demo-review-${type}-${target}-${k + 1}`,
+        class_code: '체험용',
+        review_date: DEMO_FIXED_QUERY_DATE,
+        reviewer_id: String(reviewer),
+        target_id: String(target),
+        review_type: type,
+        reviewer_email: '',
+        review_content: `${target}${type === 'group' ? '모둠' : '번'}은(는) 근거와 태도가 안정적이었고, 다음에는 핵심 요약을 더 또렷하게 하면 좋겠습니다.`,
+        scores_json: createDemoScoreJson(baseScores)
+      });
+    }
+  }
+  return rows;
+}
+
+function buildDemoReviewRows() {
+  // Balanced demo distribution:
+  // - 1/5 bands: few
+  // - 3/4 bands: many
+  const individualPatterns = [
+    // 1점대 (2명)
+    [1, 1, 1, 1], [1, 1, 1, 1],
+    // 2점대 (4명)
+    [2, 2, 2, 2], [2, 2, 2, 2], [2, 2, 1, 2], [2, 1, 2, 2],
+    // 3점대 (8명)
+    [3, 3, 3, 3], [3, 3, 3, 3], [3, 3, 3, 3], [3, 3, 3, 3],
+    [3, 3, 2, 3], [3, 2, 3, 3], [2, 3, 3, 3], [3, 3, 3, 2],
+    // 4점대 (8명)
+    [4, 4, 4, 4], [4, 4, 4, 4], [4, 4, 4, 4], [4, 4, 4, 4],
+    [4, 4, 3, 4], [4, 3, 4, 4], [3, 4, 4, 4], [4, 4, 4, 3],
+    // 5점대 (2명)
+    [5, 5, 5, 5], [5, 5, 5, 5]
+  ];
+
+  const groupPatterns = [
+    // 1점대 1개, 5점대 1개, 3/4점대가 더 많게
+    [1, 1, 1, 2], [3, 3, 3, 3], [3, 3, 2, 3],
+    [4, 4, 4, 4], [4, 4, 3, 4], [5, 5, 5, 5]
+  ];
+
+  return [
+    ...buildDemoReviewsByTargets({ type: 'individual', targetCount: 24, reviewerCount: 3, patterns: individualPatterns }),
+    ...buildDemoReviewsByTargets({ type: 'group', targetCount: 6, reviewerCount: 4, patterns: groupPatterns })
+  ];
+}
+
+DEMO_DATA.reviews = buildDemoReviewRows();
+
 // 체험 모드 DB 프록시 설치 — 모든 write 차단, select는 DEMO_DATA에서 반환
 function installDemoDbProxy() {
   const originalFrom = db.from.bind(db);
@@ -589,7 +653,10 @@ function installDemoDbProxy() {
     }
 
     return {
-      select: function (...args) { return originalFrom(tableName).select(...args); },
+      select: function (...args) {
+        if (tableName === 'reviews') return createDemoSelectChain();
+        return originalFrom(tableName).select(...args);
+      },
       insert: function () { showDemoBlockModal(); return createFakeWriteChain(); },
       update: function () { showDemoBlockModal(); return createFakeWriteChain(); },
       upsert: function () { showDemoBlockModal(); return createFakeWriteChain(); },
@@ -2627,14 +2694,16 @@ async function loadTeacherDiaryData() {
 
   try {
     // 통계 데이터 로드
-    const { data: allReflectionsData } = await db.from('daily_reflections')
-      .select('*')
-      .eq('class_code', currentClassCode);
-
-    const { data: todayReflectionsData } = await db.from('daily_reflections')
-      .select('*')
-      .eq('class_code', currentClassCode)
-      .eq('reflection_date', selectedDate);
+    const [{ data: allReflectionsData }, { data: todayReflectionsData }, settings] = await Promise.all([
+      db.from('daily_reflections')
+        .select('*')
+        .eq('class_code', currentClassCode),
+      db.from('daily_reflections')
+        .select('*')
+        .eq('class_code', currentClassCode)
+        .eq('reflection_date', selectedDate),
+      getClassSettings()
+    ]);
     let allReflections = allReflectionsData || [];
     let todayReflections = todayReflectionsData || [];
     if (isDemoMode && allReflections.length === 0) {
@@ -2645,6 +2714,7 @@ async function loadTeacherDiaryData() {
     // 통계 업데이트
     document.getElementById('totalReflections').textContent = allReflections?.length || 0;
     document.getElementById('todayReflections').textContent = todayReflections?.length || 0;
+    renderDiaryCompletionStatus(todayReflections || [], settings?.studentCount || 30, selectedDate);
 
     // 감정 키워드 알림 감지
     renderEmotionAlerts(todayReflections || []);
@@ -2705,6 +2775,94 @@ function switchPraiseTab(mode) {
     btns[2].classList.add('active');
     document.getElementById('teacherMessageTab').classList.remove('hidden');
   }
+}
+
+function renderDiaryCompletionStatus(todayReflections, totalStudents, selectedDate) {
+  const summaryEl = document.getElementById('diaryCompletionSummary');
+  const listEl = document.getElementById('diaryCompletionList');
+  const detailEl = document.getElementById('diaryStudentDetail');
+  if (!summaryEl || !listEl || !detailEl) return;
+
+  const reflectionMap = new Map();
+  (todayReflections || []).forEach(r => {
+    const sid = String(r.student_id || '').trim();
+    if (!sid) return;
+    if (!reflectionMap.has(sid)) reflectionMap.set(sid, r);
+  });
+
+  const submittedCount = reflectionMap.size;
+  const unsubmittedCount = Math.max(0, totalStudents - submittedCount);
+  summaryEl.innerHTML =
+    '<strong style="color:#0f766e;">제출 ' + submittedCount + '명</strong> · ' +
+    '<strong style="color:#b91c1c;">미제출 ' + unsubmittedCount + '명</strong>';
+
+  listEl.innerHTML = '';
+  let firstButton = null;
+  let firstSubmittedButton = null;
+  for (let i = 1; i <= totalStudents; i++) {
+    const sid = String(i);
+    const reflection = reflectionMap.get(sid) || null;
+    const isSubmitted = !!reflection;
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.style.padding = '10px 8px';
+    btn.style.borderRadius = '10px';
+    btn.style.border = 'none';
+    btn.style.cursor = 'pointer';
+    btn.style.fontFamily = "'Jua', sans-serif";
+    btn.style.fontSize = '0.9rem';
+    btn.style.transition = 'transform .12s ease, box-shadow .12s ease';
+    btn.style.boxShadow = isSubmitted ? '0 2px 8px rgba(34,197,94,.20)' : '0 2px 8px rgba(239,68,68,.16)';
+    btn.style.background = isSubmitted ? '#dcfce7' : '#fee2e2';
+    btn.style.color = isSubmitted ? '#166534' : '#991b1b';
+    btn.innerHTML = '<div style="font-weight:700;">' + sid + '번</div><div style="font-size:.74rem;opacity:.9;">' + (isSubmitted ? '제출' : '미제출') + '</div>';
+
+    btn.onclick = () => {
+      listEl.querySelectorAll('button').forEach(b => b.style.outline = 'none');
+      btn.style.outline = '2px solid ' + (isSubmitted ? '#22c55e' : '#ef4444');
+      renderDiaryStudentDetail(reflection, sid, selectedDate, isSubmitted);
+    };
+
+    listEl.appendChild(btn);
+    if (!firstButton) firstButton = btn;
+    if (isSubmitted && !firstSubmittedButton) firstSubmittedButton = btn;
+  }
+
+  const initialBtn = firstSubmittedButton || firstButton;
+  if (initialBtn) initialBtn.click();
+}
+
+function renderDiaryStudentDetail(reflection, studentId, selectedDate, isSubmitted) {
+  const detailEl = document.getElementById('diaryStudentDetail');
+  if (!detailEl) return;
+  const stripeColors = ['#5f97c4', '#7e7acf', '#6faf8c'];
+  const stripeColor = stripeColors[(Math.max(1, Number(studentId)) - 1) % stripeColors.length] || '#5f97c4';
+
+  if (!isSubmitted || !reflection) {
+    detailEl.innerHTML =
+      '<div style="padding:14px;border-radius:12px;background:#ffffff;border:1.5px solid #d1d5db;border-left:5px solid ' + stripeColor + ';">' +
+      '<div style="font-weight:700;color:#374151;margin-bottom:6px;">' + studentId + '번 학생</div>' +
+      '<div style="font-size:.9rem;color:#b91c1c;">' + selectedDate + ' 배움노트를 아직 제출하지 않았습니다.</div>' +
+      '</div>';
+    return;
+  }
+
+  const tags = Array.isArray(reflection.subject_tags) ? reflection.subject_tags : [];
+  const tagsHtml = tags.length > 0
+    ? '<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;">' +
+      tags.map(tag => '<span style="padding:2px 8px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:.76rem;">' + escapeHtml(String(tag)) + '</span>').join('') +
+      '</div>'
+    : '';
+  detailEl.innerHTML =
+    '<div style="padding:14px;border-radius:12px;background:#ffffff;border:1.5px solid #d1d5db;border-left:5px solid ' + stripeColor + ';">' +
+    '<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:8px;">' +
+    '<strong style="color:#065f46;">' + studentId + '번 학생</strong>' +
+    '<span style="font-size:.78rem;color:#0f766e;">' + selectedDate + ' 제출 완료</span>' +
+    '</div>' +
+    '<div style="font-size:.92rem;color:var(--text-main);line-height:1.6;white-space:pre-wrap;">' + escapeHtml(String(reflection.learning_text || '작성된 내용이 없습니다.')) + '</div>' +
+    tagsHtml +
+    '</div>';
 }
 
 // 선생님께 메시지만 전송
@@ -2937,7 +3095,11 @@ function renderEmotionAlerts(reflections) {
   });
   if (alerts.length === 0) { area.classList.add('hidden'); return; }
   area.classList.remove('hidden');
-  list.innerHTML = alerts.map(a => '<div style="padding:10px;background:var(--bg-body);border-radius:8px;border-left:3px solid var(--color-teacher);margin-bottom:8px;"><div style="font-weight:700;margin-bottom:4px;">' + a.studentId + '번 학생</div><div style="font-size:0.83rem;color:var(--text-sub);margin-bottom:4px;">' + escapeHtml(a.text) + (a.text.length >= 80 ? '...' : '') + '</div><div>' + a.keywords.map(k => '<span style="display:inline-block;padding:2px 8px;background:#eef2ff;color:#4f46e5;border-radius:10px;font-size:0.75rem;margin:2px;">' + k + '</span>').join('') + '</div></div>').join('');
+  const stripeColors = ['#5f97c4', '#7e7acf', '#6faf8c'];
+  list.innerHTML = alerts.map((a, idx) => {
+    const stripe = stripeColors[idx % stripeColors.length];
+    return '<div style="padding:10px;background:#ffffff;border-radius:8px;border:1.5px solid #d1d5db;border-left:4px solid ' + stripe + ';margin-bottom:8px;"><div style="font-weight:700;margin-bottom:4px;">' + a.studentId + '번 학생</div><div style="font-size:0.83rem;color:var(--text-sub);margin-bottom:4px;">' + escapeHtml(a.text) + (a.text.length >= 80 ? '...' : '') + '</div><div>' + a.keywords.map(k => '<span style="display:inline-block;padding:2px 8px;background:#eef2ff;color:#4f46e5;border-radius:10px;font-size:0.75rem;margin:2px;">' + k + '</span>').join('') + '</div></div>';
+  }).join('');
 }
 
 // 메시지 목록 렌더링

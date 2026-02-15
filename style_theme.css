@@ -163,19 +163,164 @@
     padding: 10px;
 }
 
-#settingsMiniTab #studentMappingGrid {
-    background: var(--bg-body) !important;
+/* Class info row should not have yellow tone wrapper */
+#settingsMiniTab #classInfoCard .settings-two-col {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+}
+
+/* Teacher settings: outer card white + gray border, inner fields keep class-tone background */
+#settingsMiniTab #classCompositionCard {
+    background: #ffffff !important;
+    border: 1.5px solid #d1d5db !important;
+    border-left: 1.5px solid #d1d5db !important;
+}
+
+#settingsMiniTab #classCompositionFields {
+    background: transparent !important;
     border: none !important;
     border-radius: 12px;
-    padding: 8px;
+    padding: 0;
+}
+
+/* Teacher review filter: keep date field single gray border */
+#rankStudentArea #teacherDate {
+    background: #ffffff !important;
+    border: 1.5px solid #d1d5db !important;
+    box-shadow: none !important;
+}
+
+#rankStudentArea #teacherDate:focus {
+    border-color: #9ca3af !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+/* Teacher overall/individual date section card: white tone */
+#teacherMain #rankStudentArea {
+    background: #ffffff !important;
+    border: 1.5px solid #d1d5db !important;
+    border-left: 1.5px solid #d1d5db !important;
+    box-shadow: none !important;
+}
+
+/* Criteria tab: remove warm/red tint and keep neutral gray tone */
+#criteriaMiniTab .accent-box {
+    background: #ffffff !important;
+    border: 1.5px solid #d1d5db !important;
+    border-left: 1.5px solid #d1d5db !important;
+}
+
+#criteriaMiniTab input,
+#criteriaMiniTab select,
+#criteriaMiniTab textarea {
+    background: #ffffff !important;
+    border: 1.5px solid #d1d5db !important;
+    box-shadow: none !important;
+}
+
+#criteriaMiniTab input:focus,
+#criteriaMiniTab select:focus,
+#criteriaMiniTab textarea:focus {
+    border-color: #9ca3af !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+/* Criteria internals: remove warm tint blocks */
+#criteriaMiniTab [style*="background:var(--bg-soft)"] {
+    background: #ffffff !important;
+    border: 1.5px solid #d1d5db !important;
+}
+
+/* Diary participation status card: white tone */
+#diaryParticipationCard {
+    background: #ffffff !important;
+    border: 1.5px solid #d1d5db !important;
+    border-left: 1.5px solid #d1d5db !important;
+}
+
+#settingsMiniTab #studentMappingGrid {
+    background: #ffffff !important;
+    border: 1.5px solid #d1d5db !important;
+    border-radius: 12px;
+    padding: 10px;
+    max-height: none !important;
+    overflow: visible !important;
 }
 
 #settingsMiniTab #studentMappingGrid .student-auth-item {
-    background: #fffaf2 !important;
-    border: none !important;
+    background: #ffffff !important;
+    border: 1.5px solid #d1d5db !important;
     border-radius: 10px;
-    padding: 8px;
-    margin-bottom: 6px;
+    padding: 10px 8px;
+    margin-bottom: 8px;
+}
+
+
+/* Teacher settings layout cleanup */
+#settingsMiniTab {
+    display: grid;
+    gap: 14px;
+}
+
+#settingsMiniTab .accent-box {
+    padding: 18px !important;
+}
+
+#settingsMiniTab .settings-two-col {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px !important;
+    margin-top: 10px;
+    margin-bottom: 14px !important;
+}
+
+#settingsMiniTab .settings-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+}
+
+#settingsMiniTab .settings-field label {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #57534e;
+}
+
+#settingsMiniTab .settings-field input {
+    min-height: 44px;
+    background: #ffffff !important;
+    border: 1.5px solid #d1d5db !important;
+    border-radius: 10px !important;
+    padding: 10px 12px !important;
+}
+
+#settingsMiniTab .settings-field input:focus {
+    border-color: #9ca3af !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Class info inputs should stay white (not class-tone yellow) */
+#settingsMiniTab #settingClassName,
+#settingsMiniTab #settingClassCode {
+    background: #ffffff !important;
+}
+
+#settingsMiniTab .accent-box > button {
+    margin-top: 2px;
+}
+
+@media (max-width: 700px) {
+    #settingsMiniTab .settings-two-col {
+        grid-template-columns: 1fr;
+    }
 }
 
 :root {
@@ -389,6 +534,10 @@ button[onclick*="logout"]:hover {
 #studentMainSection .accent-box.box-rose .box-label,
 #studentMainSection #streakBadgeArea .box-label {
     color: var(--text-main) !important;
+}
+
+#studentMainSection #streakBadgeArea {
+    border-left: none !important;
 }
 
 /* Requested neutral border unification (same as praise-send card) */
@@ -642,11 +791,6 @@ div[style*="border-top-color"] {
     background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%) !important;
 }
 
-/* 선생님 진행바 */
-#teacherMain .bar-fill {
-    background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%) !important;
-}
-
 #teacherMain .bar-track {
     background: #e5e7eb !important;
 }
@@ -786,6 +930,12 @@ div[style*="border-top-color"] {
     font-family: 'Jua', sans-serif !important;
 }
 
+#studentMainSection .bottom-nav .nav-item:nth-child(2).active-nav .nav-label,
+#studentMainSection .bottom-nav .nav-item:nth-child(3).active-nav .nav-label,
+#teacherMain .bottom-nav .nav-item:nth-child(3).active-nav .nav-label {
+    color: #7c3aed !important;
+}
+
 /* ── 24. 반응형 조정 ─────────────────────── */
 @media (max-width: 480px) {
     .card {
@@ -862,7 +1012,7 @@ input:checked+.switch-slider:before {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
-    margin-top: 25px;
+    margin-top: 34px;
     margin-bottom: 5px;
 }
 
@@ -872,6 +1022,7 @@ input:checked+.switch-slider:before {
     border-radius: 50px !important;
     padding: 8px 14px !important;
     font-size: 0.98rem !important;
+    font-weight: 700 !important;
     font-family: 'Jua', sans-serif !important;
     color: #2f4a37 !important;
     cursor: pointer !important;
@@ -894,7 +1045,7 @@ input:checked+.switch-slider:before {
     border-color: #5c8468 !important;
     color: white !important;
     font-size: 0.98rem !important;
-    font-weight: 500 !important;
+    font-weight: 700 !important;
     transform: translateY(-1px) !important;
     box-shadow: 0 4px 10px rgba(44, 75, 56, 0.22) !important;
     outline: none !important;
@@ -1002,15 +1153,31 @@ input:checked+.switch-slider:before {
 }
 
 #teacherMain #studentReviews .review-card {
-    border-left-color: #64748b !important;
+    border: 1.5px solid #d1d5db !important;
+    border-left: 5px solid #5f97c4 !important;
 }
 
 #teacherMain #studentReviews .review-card:nth-of-type(2n) {
-    border-left-color: #6b7280 !important;
+    border-left-color: #7e7acf !important;
 }
 
 #teacherMain #studentReviews .review-card:nth-of-type(3n) {
-    border-left-color: #78716c !important;
+    border-left-color: #6faf8c !important;
+}
+
+/* Teacher letter management: apply striped card layout */
+#teacherMain #messageList .message-card {
+    border: 1.5px solid #d1d5db !important;
+    border-left: 5px solid #5f97c4 !important;
+    background: #ffffff !important;
+}
+
+#teacherMain #messageList .message-card:nth-of-type(2n) {
+    border-left-color: #7e7acf !important;
+}
+
+#teacherMain #messageList .message-card:nth-of-type(3n) {
+    border-left-color: #6faf8c !important;
 }
 
 #teacherMain .target-btn {

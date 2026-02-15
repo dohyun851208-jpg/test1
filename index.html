@@ -1235,11 +1235,11 @@
 
             // ===== Typing Animation =====
             const words = [
-                { text: '서로를 응원하고 있어요 💌', tone: 'together' },
-                { text: '오늘의 배움을 기록하고 있어요 ✍️', tone: 'self' },
-                { text: '나만의 학습 스타일을 찾고 있어요 🧠', tone: 'self' },
+                { text: '배움 노트를 쓰고 있어요 🧠', tone: 'self' },
                 { text: '동료 피드백을 나누고 있어요 💌', tone: 'together' },
-                { text: 'AI로 맞춤 피드백을 받고 있어요 🤖', tone: 'ai' }
+                { text: 'AI 성장 파트너를 찾고 있어요 🤖', tone: 'ai' },
+                { text: '오늘의 배움을 기록하고 있어요 ✍️', tone: 'self' },
+                { text: '응원편지를 쓰고 있어요 💌', tone: 'together' }
             ];
             const typedEl = document.getElementById('typedWord');
             let wordIdx = 0, charIdx = 0, isDeleting = false;
@@ -1269,7 +1269,8 @@
                     setTimeout(typeLoop, 40);
                 }
             }
-            setTimeout(typeLoop, 800);
+            // Start about 1s after hero brand reveal is fully visible.
+            setTimeout(typeLoop, 3600);
 
             // ===== Counter Animation =====
             const counters = document.querySelectorAll('.stat-number[data-target]');
