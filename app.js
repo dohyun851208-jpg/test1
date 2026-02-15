@@ -1681,18 +1681,18 @@ function renderScoreDistribution(ranking, type) {
 
   const maxBin = Math.max(...bins, 1);
   const colorPairs = [
-    ['#C96D6D', '#E29A7D'],
-    ['#C78B4A', '#E4BF79'],
-    ['#5FA584', '#8CCDA9'],
-    ['#4B88B7', '#79B4DC'],
-    ['#7566C9', '#A191E5']
+    ['#c779d0', '#e2a6e8'],
+    ['#6f86d6', '#9fb0ea'],
+    ['#5f9ea0', '#8bbdc0'],
+    ['#6fa98f', '#98c3b1'],
+    ['#7b8bbd', '#a2aed2']
   ];
 
   let h = '<div class="chart-container" style="border-left-color:var(--color-blue);margin-top:20px;"><h4 style="color:var(--color-blue);">' + (type === 'group' ? '\uBAA8\uB46C' : '\uAC1C\uC778') + ' \uD3C9\uADE0 \uC810\uC218 \uBD84\uD3EC</h4><div class="bar-chart">';
   binLabels.forEach((label, i) => {
     const pct = (bins[i] / maxBin) * 100;
     const pair = colorPairs[i] || colorPairs[0];
-    h += '<div class="bar-item"><div class="bar-label">' + label + '</div><div class="bar-track"><div class="bar-fill" style="width:' + pct + '%;background:linear-gradient(90deg,' + pair[0] + ' 0%,' + pair[1] + ' 100%);"></div></div><div class="bar-value">' + bins[i] + '\uBA85</div></div>';
+    h += '<div class="bar-item"><div class="bar-label">' + label + '</div><div class="bar-track"><div class="bar-fill" style="width:' + pct + '%;background:linear-gradient(90deg,' + pair[0] + ' 0%,' + pair[1] + ' 100%) !important;"></div></div><div class="bar-value">' + bins[i] + '\uBA85</div></div>';
   });
   h += '</div></div>';
   document.getElementById('rankingTable').insertAdjacentHTML('afterend', h);

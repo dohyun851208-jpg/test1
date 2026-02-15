@@ -479,7 +479,7 @@ div[style*="border-top-color"] {
 }
 
 #teacherMain .bar-track {
-    background: #e0e7ff !important;
+    background: #e5e7eb !important;
 }
 
 /* ── 21. 칭찬 우체통 카드 ────────────────── */
@@ -810,4 +810,60 @@ input:checked+.switch-slider:before {
 
 .tag-btn:active {
     transform: translateY(0) scale(0.95) !important;
+}
+
+/* Teacher individual status tab visual tuning */
+#teacherMain #studentSelector .student-btn {
+    background: #ffffff !important;
+    border: 2px solid #d6d3d1 !important;
+    color: #57534e !important;
+    box-shadow: none !important;
+}
+
+#teacherMain #studentSelector .student-btn:hover {
+    border-color: #94a3b8 !important;
+    color: #475569 !important;
+    background: #f8fafc !important;
+}
+
+#teacherMain #studentSelector .student-btn.active {
+    border-color: #94a3b8 !important;
+    background: #f1f5f9 !important;
+    color: #334155 !important;
+}
+
+#teacherMain #studentReviews .review-card {
+    border-left-color: #64748b !important;
+}
+
+#teacherMain #studentReviews .review-card:nth-of-type(2n) {
+    border-left-color: #6b7280 !important;
+}
+
+#teacherMain #studentReviews .review-card:nth-of-type(3n) {
+    border-left-color: #78716c !important;
+}
+
+#teacherMain .target-btn {
+    border-color: #d6d3d1 !important;
+    color: #57534e !important;
+    background: #ffffff !important;
+}
+
+#teacherMain .target-btn:hover:not(.done):not(.disabled) {
+    border-color: #94a3b8 !important;
+    color: #475569 !important;
+    background: #f8fafc !important;
+}
+
+#teacherMain .target-btn.selected {
+    border-color: #94a3b8 !important;
+    background: #f1f5f9 !important;
+    color: #334155 !important;
+    box-shadow: none !important;
+}
+
+/* Teacher dashboard: hide "today diary writing rate" card in overall status */
+#teacherDashboard .stat-card[style*="--color-rose"] {
+    display: none !important;
 }
