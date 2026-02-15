@@ -25,7 +25,7 @@ let currentMessageMode = null; // 'anonymous' or 'named'
 const OTHER_SUBJECT_TAG = '기타';
 const PRESET_SUBJECT_TAGS = [
   '국어', '수학', '사회', '과학', '영어', '음악', '미술',
-  '체육', '도덕', '실과', '토론', '발표', '모둠활동', OTHER_SUBJECT_TAG
+  '체육', '도덕', '실과', '기술', '가정', '통합교과', '토론', '발표', '모둠활동', OTHER_SUBJECT_TAG
 ];
 
 let quizAnswers = {}; // 성향 진단 답변 저장
@@ -147,6 +147,45 @@ function getCustomSubjectInputEl() {
   return document.getElementById('customSubjectInput');
 }
 
+function ensureSubjectTagButtons() {
+  const container = document.querySelector('#dailyReflectionTab .subject-tags');
+  if (!container) return;
+
+  const orderedTags = [
+    '국어', '수학', '사회', '과학', '영어', '음악', '미술',
+    '체육', '도덕', '실과', '기술', '가정', '통합교과', '토론', '발표', '모둠활동', OTHER_SUBJECT_TAG
+  ];
+  const iconMap = {
+    '국어': '📖',
+    '수학': '🔢',
+    '사회': '🌍',
+    '과학': '🔬',
+    '영어': '🔤',
+    '음악': '🎵',
+    '미술': '🎨',
+    '체육': '⚽',
+    '도덕': '💛',
+    '실과': '🔧',
+    '기술': '🛠️',
+    '가정': '🏠',
+    '통합교과': '🧩',
+    '토론': '💬',
+    '발표': '🎤',
+    '모둠활동': '👥',
+    [OTHER_SUBJECT_TAG]: '✨'
+  };
+
+  container.innerHTML = '';
+  orderedTags.forEach(tag => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'subject-tag-btn';
+    btn.onclick = () => toggleSubjectTag(tag);
+    btn.textContent = `${iconMap[tag] || '📌'} ${tag}`;
+    container.appendChild(btn);
+  });
+}
+
 function ensureCustomSubjectInput() {
   if (getCustomSubjectInputEl()) return;
   const saveBtn = document.getElementById('saveDailyBtn');
@@ -156,6 +195,7 @@ function ensureCustomSubjectInput() {
   wrap.id = 'customSubjectWrap';
   wrap.className = 'hidden';
   wrap.style.marginTop = '8px';
+  wrap.style.marginBottom = '14px';
 
   const input = document.createElement('input');
   input.type = 'text';
@@ -164,7 +204,7 @@ function ensureCustomSubjectInput() {
   input.style.width = '100%';
   input.style.boxSizing = 'border-box';
   input.style.padding = '10px 12px';
-  input.style.border = '1.5px solid var(--border)';
+  input.style.border = 'none';
   input.style.borderRadius = '10px';
   input.style.fontFamily = "'Jua', sans-serif";
   input.style.fontSize = '0.92rem';
@@ -444,7 +484,7 @@ async function checkAuthAndRoute() {
       } catch (dataError) {
         console.warn('학생 데이터 로드 중 일부 오류:', dataError);
         // 최소한 기본 그리드는 표시
-        renderTargetGrid(30, currentStudent.id, [], currentStudent.type);
+        renderTargetGrid(isDemoMode ? 24 : 30, currentStudent.id, [], currentStudent.type);
       }
     }
   } catch (error) {
@@ -809,15 +849,22 @@ document.getElementById('teacherDate').addEventListener('change', function () {
 // ============================================
 async function getClassInfo() {
   try {
+    if (isDemoMode) {
+      const demoClass = Array.isArray(DEMO_DATA.classes)
+        ? DEMO_DATA.classes.find(c => String(c.class_code) === String(currentClassCode))
+        : null;
+      return demoClass || { class_code: '체험용', class_name: '체험용 학급', student_count: 24, group_count: 6 };
+    }
     const { data } = await db.from('classes').select('*').eq('class_code', currentClassCode).maybeSingle();
     return data;
-  } catch (err) { console.warn('getClassInfo 오류:', err); return null; }
+  } catch (err) { console.warn('getClassInfo error:', err); return null; }
 }
 async function getClassSettings() {
   try {
+    if (isDemoMode) return { studentCount: 24, groupCount: 6 };
     const info = await getClassInfo();
     return { studentCount: info ? info.student_count : 30, groupCount: info ? info.group_count : 6 };
-  } catch (err) { console.warn('getClassSettings 오류:', err); return { studentCount: 30, groupCount: 6 }; }
+  } catch (err) { console.warn('getClassSettings error:', err); return isDemoMode ? { studentCount: 24, groupCount: 6 } : { studentCount: 30, groupCount: 6 }; }
 }
 async function getObjectiveAndTask(dateStr) {
   const { data: objData } = await db.from('objectives').select('objective').eq('class_code', currentClassCode).eq('eval_date', dateStr).maybeSingle();
@@ -1272,7 +1319,7 @@ async function switchPeerTab(mode) {
           renderTargetGrid(maxCount, currentStudent.id, [], currentStudent.type);
         } catch (e) {
           // classes 테이블 자체가 없을 경우 기본값으로 그리드 표시
-          renderTargetGrid(30, currentStudent.id, [], currentStudent.type);
+          renderTargetGrid(isDemoMode ? 24 : 30, currentStudent.id, [], currentStudent.type);
         }
       }
     }
@@ -1441,6 +1488,16 @@ function updateCharCount() {
 // ============================================
 // 평가 대상 그리드
 // ============================================
+function getDemoReviewTemplate(targetId) {
+  const tid = String(targetId);
+  return [
+    '👍 잘한 점: ' + tid + '번은 발표할 때 핵심 개념을 먼저 말하고 예시를 붙여 설명해서 듣는 사람이 이해하기 쉬웠어.',
+    '💡 이렇게 하면 더 좋아질 것 같아: 근거를 말한 뒤 "왜 그렇게 생각했는지"를 한 문장만 더 덧붙이면 설득력이 더 커질 것 같아.',
+    '✨ 특히 인상적이었던 부분은 질문을 받았을 때 바로 답하려고 하기보다 차분히 정리해서 말한 태도였어.',
+    '💪 다음에는 이런 점을 시도해보면 좋겠어: 발표 끝부분에 오늘 배운 핵심 1줄 요약을 넣어서 마무리해보자.'
+  ].join('\n\n');
+}
+
 async function loadEvalTargetGrid() {
   const date = document.getElementById('reviewDate').value;
   const [completed, settings] = await Promise.all([getCompletedTargets(date, currentStudent.id, currentStudent.type), getClassSettings()]);
@@ -1464,6 +1521,12 @@ function renderTargetGrid(maxCount, myId, completedList, type) {
     else if (completedList.includes(String(i))) { btn.classList.add('done'); btn.title = '이미 평가 완료 (클릭하면 수정)'; btn.onclick = () => selectTarget(i, btn); }
     else { btn.onclick = () => selectTarget(i, btn); }
     grid.appendChild(btn);
+  }
+
+  // Demo mode: auto-focus first available target so score buttons look pre-filled immediately.
+  if (isDemoMode) {
+    const firstSelectable = grid.querySelector('.target-btn.done, .target-btn:not(.disabled)');
+    if (firstSelectable) firstSelectable.click();
   }
 }
 async function selectTarget(id, button) {
@@ -1510,7 +1573,25 @@ async function selectTarget(id, button) {
     }
 
     if (requestSeq !== targetSelectionRequestSeq) return;
-    if (existing && existing.scores_json) applyExistingRatings(existing.scores_json);
+    if (existing && existing.scores_json) {
+      applyExistingRatings(existing.scores_json);
+      return;
+    }
+
+    // Demo mode: show varied pre-selected scores even when no saved review exists.
+    if (isDemoMode && ratingCriteria && ratingCriteria.length > 0) {
+      const demoScores = {};
+      for (let idx = 0; idx < ratingCriteria.length; idx++) {
+        demoScores[String(idx)] = ((Number(id) + idx) % 5) + 1;
+      }
+      applyExistingRatings({ criteria: ratingCriteria, scores: demoScores });
+
+      const reviewEl = document.getElementById('reviewContent');
+      if (reviewEl) {
+        reviewEl.value = getDemoReviewTemplate(id);
+        updateCharCount();
+      }
+    }
   } catch (error) {
     console.warn('Failed to load saved scores for target:', error);
   }
@@ -2327,6 +2408,7 @@ function toggleSubjectTag(tag) {
 // 데일리 자기평가 로드
 async function loadDailyReflection() {
   if (!currentStudent || !currentClassCode) return;
+  ensureSubjectTagButtons();
   ensureCustomSubjectInput();
 
   let targetDate = document.getElementById('selfDate').value;
@@ -2373,8 +2455,6 @@ async function loadDailyReflection() {
     if (tagBtn) tagBtn.classList.add('selected');
   });
   syncCustomSubjectInputVisibility();
-  // 선생님 답장 확인
-  await checkForTeacherReplies();
 }
 
 // 데일리 자기평가 제출
@@ -2453,29 +2533,8 @@ async function generateAiFeedback(learning, subjects) {
   }
 }
 
-// 선생님 답장 확인
-async function checkForTeacherReplies() {
-  if (!currentStudent || !currentClassCode) return;
-
-  const { data: messageRows } = await db.from('teacher_messages')
-    .select('id, message_content, teacher_replies(*)')
-    .eq('class_code', currentClassCode)
-    .eq('student_id', String(currentStudent.id));
-  let messages = messageRows || [];
-  if (isDemoMode && messages.length === 0) {
-    messages = getDemoFallbackTeacherMessages(null, currentStudent.id);
-  }
-
-  if (!messages || messages.length === 0) return;
-
-  // 답장이 있는 메시지 찾기
-  const repliedMessage = messages.find(m => m.teacher_replies && m.teacher_replies.length > 0);
-
-  if (repliedMessage && repliedMessage.teacher_replies[0]) {
-    document.getElementById('teacherReplyContent').textContent = repliedMessage.teacher_replies[0].reply_content;
-    document.getElementById('teacherReplyNotification').classList.remove('hidden');
-  }
-}
+// 답장 기능 제거: legacy no-op
+async function checkForTeacherReplies() { return; }
 
 // 별점 선택
 
@@ -2645,7 +2704,6 @@ function switchPraiseTab(mode) {
   } else if (mode === 'teacher') {
     btns[2].classList.add('active');
     document.getElementById('teacherMessageTab').classList.remove('hidden');
-    checkForTeacherReplies();
   }
 }
 
@@ -3813,3 +3871,4 @@ function openPrivacyModal() {
     message: `<div class="terms-modal-body">${PRIVACY_HTML}</div>`
   });
 }
+

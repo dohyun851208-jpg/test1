@@ -624,7 +624,7 @@ button:disabled {
     flex: 1;
     padding: 10px;
     background: white;
-    border: 2px solid var(--border);
+    border: 2px solid #d6d3d1;
     border-radius: 8px;
     font-weight: 700;
     color: var(--text-sub);
