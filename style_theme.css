@@ -22,12 +22,39 @@
     animation: float 3s ease-in-out infinite;
 }
 
+.app-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35em;
+    line-height: 1.1;
+}
+
+@keyframes brand-float {
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    25% {
+        transform: translateY(2px);
+    }
+
+    75% {
+        transform: translateY(-2px);
+    }
+}
+
 .app-brand-icon {
     width: 1.35em;
     height: 1.35em;
     object-fit: contain;
-    vertical-align: -0.18em;
-    margin-right: 0.28em;
+    vertical-align: middle;
+    margin-right: 0;
+}
+
+.app-title .app-brand-icon.floating-emoji {
+    animation-name: brand-float;
 }
 
 .class-tone-section {
