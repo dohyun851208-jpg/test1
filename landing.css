@@ -1319,20 +1319,13 @@ body::before {
     width: 100%;
     padding: 44px 20px 34px;
     background: linear-gradient(180deg, #F5F3FF 0%, #EEF2FF 50%, #F8FAFC 100%);
-    border-top: 1px solid rgba(99, 102, 241, .10);
+    border-top: none;
     position: relative;
     overflow: hidden;
 }
 
 .site-footer::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: min(92%, 860px);
-    height: 2px;
-    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, .40), rgba(139, 92, 246, .35), transparent);
+    content: none;
 }
 
 .footer-inner {

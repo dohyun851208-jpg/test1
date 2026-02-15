@@ -4,7 +4,6 @@
 // ============================================
 const SUPABASE_URL = 'https://ftvalqzaiooebkulafzg.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0dmFscXphaW9vZWJrdWxhZnpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzNzk1MzAsImV4cCI6MjA4NTk1NTUzMH0.M1qXvUIuNe2y-9y1gQ2svRdHvDKrMRQ4oMGZPIZveQs';
-const GEMINI_API_KEY = 'AIzaSyA3c5OMfaLKwugsWGGJplh9vGyoOlWDNdk';
 
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY, {
@@ -1474,14 +1473,30 @@ async function viewMyResult() {
 // Gemini AI
 // ============================================
 async function callGemini(promptText, config = {}) {
-  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=' + encodeURIComponent(GEMINI_API_KEY);
   try {
-    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }], ...(config.generationConfig ? { generationConfig: config.generationConfig } : {}) }) });
-    const data = await res.json();
-    if (!res.ok) return { ok: false, error: data?.error?.message || 'HTTP ' + res.status };
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    return text ? { ok: true, text } : { ok: false, error: '빈 응답' };
-  } catch (e) { return { ok: false, error: e.message }; }
+    const res = await fetch('/api/gemini', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        promptText,
+        ...(config.generationConfig ? { generationConfig: config.generationConfig } : {})
+      })
+    });
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok || !data?.ok) {
+      const code = data?.code || 'provider_error';
+      if (code === 'auth_error') return { ok: false, code, error: 'AI 인증 오류: API 키 설정을 확인해 주세요.' };
+      if (code === 'quota_exceeded') return { ok: false, code, error: 'AI 사용량 초과: 잠시 후 다시 시도해 주세요.' };
+      if (code === 'network_error') return { ok: false, code, error: '네트워크 오류: 연결 상태를 확인해 주세요.' };
+      return { ok: false, code, error: data?.error || ('HTTP ' + res.status) };
+    }
+
+    const text = data?.text;
+    return text ? { ok: true, text } : { ok: false, code: 'empty_response', error: 'AI 응답이 비어 있습니다.' };
+  } catch (e) {
+    return { ok: false, code: 'network_error', error: '네트워크 오류: 연결 상태를 확인해 주세요.' };
+  }
 }
 async function generateSummary(reviews) {
   if (!reviews || reviews.length === 0) return '요약할 리뷰 데이터가 없습니다.';
@@ -2871,11 +2886,6 @@ async function loadDashboardData() {
 // ============================================
 // 나의 목표 설정 & 추적
 // ============================================
-async function loadGoals() {
-  if (!currentStudent || !currentClassCode) return;
-  const { data: goals } = await db.from('student_goals').select('*').eq('class_code', currentClassCode).eq('student_id', String(currentStudent.id)).order('created_at', { ascending: false }).limit(20);
-  renderGoals(goals || []);
-}
 function renderGoals(goals) {
   const list = document.getElementById('goalList');
   const progress = document.getElementById('goalProgress');
@@ -3393,5 +3403,3 @@ function openPrivacyModal() {
     message: `<div class="terms-modal-body">${PRIVACY_HTML}</div>`
   });
 }
-
-

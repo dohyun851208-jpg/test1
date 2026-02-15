@@ -128,8 +128,8 @@ button:active {
 }
 
 /* 학생용 주요 버튼 */
-.accent-box.box-blue button:not(.template-btn):not(.tag-btn),
-.accent-box.box-violet button:not(.template-btn):not(.tag-btn),
+.accent-box.box-blue button:not(.template-btn):not(.tag-btn):not(.subject-tag-btn),
+.accent-box.box-violet button:not(.template-btn):not(.tag-btn):not(.subject-tag-btn),
 #selfEvaluationSection button[style*="color-blue"],
 #selfEvaluationSection button[onclick*="save"],
 #selfEvaluationSection button[onclick*="submit"],
@@ -329,6 +329,15 @@ button[onclick*="logout"]:hover {
 .stat-num {
     font-family: 'Jua', sans-serif !important;
     color: var(--primary) !important;
+}
+
+/* 내 결과 확인: 참여 인원/나의 평균 점수 색상 분리 */
+#statsSummary .stat-card:nth-child(1) .stat-number {
+    color: var(--color-teal) !important;
+}
+
+#statsSummary .stat-card:nth-child(2) .stat-number {
+    color: #e67e22 !important;
 }
 
 /* ── 12. 모달 ────────────────────────────── */
@@ -689,41 +698,40 @@ input:checked+.switch-slider:before {
 }
 
 .subject-tag-btn {
-    background: #f5fbff !important;
-    border: 2px solid #c8deef !important;
+    background: #f6faf7 !important;
+    border: 1.5px solid #c7d9cb !important;
     border-radius: 50px !important;
     padding: 10px 18px !important;
-    font-size: 0.84rem !important;
+    font-size: 1.09rem !important;
     font-family: 'Jua', sans-serif !important;
-    color: #0f5f7a !important;
+    color: #2f4a37 !important;
     cursor: pointer !important;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    box-shadow: 0 2px 6px rgba(15, 95, 122, 0.1) !important;
+    box-shadow: 0 1px 3px rgba(47, 74, 55, 0.08) !important;
     display: flex !important;
     align-items: center !important;
     gap: 6px !important;
 }
 
 .subject-tag-btn:hover {
-    background: #e9f5ff !important;
-    border-color: #38bdf8 !important;
-    color: #075985 !important;
-    transform: translateY(-2px) !important;
+    background: #eef5f0 !important;
+    border-color: #9db9a5 !important;
+    color: #27412f !important;
+    transform: translateY(-1px) !important;
 }
 
 .subject-tag-btn.selected {
-    background: linear-gradient(135deg, #0ea5e9, #4f46e5) !important;
-    border-color: #0ea5e9 !important;
+    background: linear-gradient(135deg, #6e947a, #5c8468) !important;
+    border-color: #5c8468 !important;
     color: white !important;
-    font-weight: 700 !important;
-    transform: translateY(-3px) scale(1.05) !important;
-    box-shadow: 0 6px 15px rgba(14, 165, 233, 0.35) !important;
-    outline: 2px solid white !important;
-    outline-offset: -4px !important;
+    font-weight: 600 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 10px rgba(44, 75, 56, 0.22) !important;
+    outline: none !important;
 }
 
 .subject-tag-btn:active {
-    transform: translateY(0) scale(0.95) !important;
+    transform: translateY(0) scale(0.98) !important;
 }
 
 /* ── 28. 가이드(템플릿) 버튼 스타일 ──────────────── */
