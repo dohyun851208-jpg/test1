@@ -22,6 +22,11 @@ let currentClassCode = '';
 // 자기평가 전역 변수
 let selectedSubjectTags = [];
 let currentMessageMode = null; // 'anonymous' or 'named'
+const OTHER_SUBJECT_TAG = '기타';
+const PRESET_SUBJECT_TAGS = [
+  '국어', '수학', '사회', '과학', '영어', '음악', '미술',
+  '체육', '도덕', '실과', '토론', '발표', '모둠활동', OTHER_SUBJECT_TAG
+];
 
 let quizAnswers = {}; // 성향 진단 답변 저장
 let studentPersonality = null; // 학생 성향 정보
@@ -72,6 +77,76 @@ function showRoleSelectInApp() {
       </div>
     </div>
   `;
+}
+
+function getCustomSubjectWrapEl() {
+  return document.getElementById('customSubjectWrap');
+}
+
+function getCustomSubjectInputEl() {
+  return document.getElementById('customSubjectInput');
+}
+
+function ensureCustomSubjectInput() {
+  if (getCustomSubjectInputEl()) return;
+  const saveBtn = document.getElementById('saveDailyBtn');
+  if (!saveBtn || !saveBtn.parentElement) return;
+
+  const wrap = document.createElement('div');
+  wrap.id = 'customSubjectWrap';
+  wrap.className = 'hidden';
+  wrap.style.marginTop = '8px';
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.id = 'customSubjectInput';
+  input.placeholder = '기타 활동을 직접 입력하세요 (예: 물리, 코딩, 미적분)';
+  input.style.width = '100%';
+  input.style.boxSizing = 'border-box';
+  input.style.padding = '10px 12px';
+  input.style.border = '1.5px solid var(--border)';
+  input.style.borderRadius = '10px';
+  input.style.fontFamily = "'Jua', sans-serif";
+  input.style.fontSize = '0.92rem';
+  input.style.outline = 'none';
+
+  wrap.appendChild(input);
+  saveBtn.parentElement.insertBefore(wrap, saveBtn);
+}
+
+function getCustomSubjectTagsFromInput() {
+  const input = getCustomSubjectInputEl();
+  if (!input) return [];
+  const raw = input.value.trim();
+  if (!raw) return [];
+  return Array.from(new Set(
+    raw.split(',')
+      .map(s => s.trim())
+      .filter(Boolean)
+  ));
+}
+
+function getEffectiveSubjectTags() {
+  const baseTags = selectedSubjectTags.filter(tag => tag !== OTHER_SUBJECT_TAG);
+  if (selectedSubjectTags.includes(OTHER_SUBJECT_TAG)) {
+    const customTags = getCustomSubjectTagsFromInput();
+    if (customTags.length > 0) baseTags.push(...customTags);
+    else baseTags.push(OTHER_SUBJECT_TAG);
+  }
+  return Array.from(new Set(baseTags));
+}
+
+function syncCustomSubjectInputVisibility({ clearOnHide = false, focusOnShow = false } = {}) {
+  ensureCustomSubjectInput();
+  const wrap = getCustomSubjectWrapEl();
+  const input = getCustomSubjectInputEl();
+  if (!wrap || !input) return;
+
+  const shouldShow = selectedSubjectTags.includes(OTHER_SUBJECT_TAG);
+  wrap.classList.toggle('hidden', !shouldShow);
+
+  if (!shouldShow && clearOnHide) input.value = '';
+  if (shouldShow && focusOnShow) input.focus();
 }
 
 
@@ -1946,17 +2021,25 @@ function toggleSubjectTag(tag) {
   if (selectedSubjectTags.includes(tag)) {
     selectedSubjectTags = selectedSubjectTags.filter(t => t !== tag);
     tagBtn.classList.remove('selected');
+    if (tag === OTHER_SUBJECT_TAG) {
+      syncCustomSubjectInputVisibility({ clearOnHide: true });
+    }
   } else {
     selectedSubjectTags.push(tag);
     tagBtn.classList.add('selected');
+    if (tag === OTHER_SUBJECT_TAG) {
+      syncCustomSubjectInputVisibility({ focusOnShow: true });
+    }
   }
 
+  syncCustomSubjectInputVisibility();
   if (navigator.vibrate) navigator.vibrate(10);
 }
 
 // 데일리 자기평가 로드
 async function loadDailyReflection() {
   if (!currentStudent || !currentClassCode) return;
+  ensureCustomSubjectInput();
 
   let targetDate = document.getElementById('selfDate').value;
   if (!targetDate) {
@@ -1974,11 +2057,21 @@ async function loadDailyReflection() {
 
   if (reflection) {
     document.getElementById('learningText').value = reflection.learning_text || '';
-    selectedSubjectTags = reflection.subject_tags || [];
+    const savedTags = Array.isArray(reflection.subject_tags) ? reflection.subject_tags : [];
+    const knownTags = savedTags.filter(tag => PRESET_SUBJECT_TAGS.includes(tag));
+    const customTags = savedTags.filter(tag => !PRESET_SUBJECT_TAGS.includes(tag));
+    selectedSubjectTags = [...knownTags];
+    if (customTags.length > 0 && !selectedSubjectTags.includes(OTHER_SUBJECT_TAG)) {
+      selectedSubjectTags.push(OTHER_SUBJECT_TAG);
+    }
+    const customInput = getCustomSubjectInputEl();
+    if (customInput) customInput.value = customTags.join(', ');
   } else {
     // 기록이 없으면 폼 초기화
     document.getElementById('learningText').value = '';
     selectedSubjectTags = [];
+    const customInput = getCustomSubjectInputEl();
+    if (customInput) customInput.value = '';
   }
 
   // 과목 태그 버튼 활성화
@@ -1987,6 +2080,7 @@ async function loadDailyReflection() {
     const tagBtn = Array.from(document.querySelectorAll('.subject-tag-btn')).find(btn => btn.innerText.includes(tag));
     if (tagBtn) tagBtn.classList.add('selected');
   });
+  syncCustomSubjectInputVisibility();
   // 선생님 답장 확인
   await checkForTeacherReplies();
 }
@@ -2013,12 +2107,13 @@ async function submitDailyReflection() {
   setLoading(true, btn, '저장 중...');
 
   try {
+    const finalSubjectTags = getEffectiveSubjectTags();
     const reflectionData = {
       class_code: currentClassCode,
       student_id: String(currentStudent.id),
       reflection_date: targetDate,
       learning_text: learningText || null,
-      subject_tags: selectedSubjectTags.length > 0 ? selectedSubjectTags : null
+      subject_tags: finalSubjectTags.length > 0 ? finalSubjectTags : null
     };
 
     const { error: reflectionError } = await db.from('daily_reflections')
@@ -2030,7 +2125,7 @@ async function submitDailyReflection() {
     showMsg(msg, '성공적으로 저장되었습니다! 🎉', 'success');
 
     // AI 맞춤 피드백 생성
-    generateAiFeedback(learningText, selectedSubjectTags);
+    generateAiFeedback(learningText, finalSubjectTags);
 
   } catch (err) {
     console.error('일기 저장 오류:', err);
